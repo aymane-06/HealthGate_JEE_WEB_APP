@@ -5,273 +5,567 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des utilisateurs - Clinique Digitale</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-</head>
-<body>
-    <jsp:include page="../components/sidebar.jsp" />
+    <title>Gestion des Utilisateurs - Admin</title>
     
-    <main class="main-content">
-        <div class="d-flex justify-between align-center mb-4">
-            <div>
-                <h1>Gestion des utilisateurs</h1>
-                <p class="text-muted">Gérer tous les comptes utilisateurs</p>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#e6f2ff', 100: '#b3d9ff', 200: '#80bfff',
+                            300: '#4da6ff', 400: '#1a8cff', 500: '#0073e6',
+                            600: '#0066CC', 700: '#0052a3', 800: '#003d7a',
+                            900: '#002952',
+                        },
+                        secondary: {
+                            50: '#e6fff9', 100: '#b3ffe9', 200: '#80ffd9',
+                            300: '#4dffc9', 400: '#1affb9', 500: '#00e6a0',
+                            600: '#00D9A5', 700: '#00a67a', 800: '#007352',
+                            900: '#004029',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        /* Modal backdrop */
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-gradient-to-b from-primary-900 to-primary-800 text-white flex-shrink-0 hidden md:flex flex-col shadow-2xl">
+            <!-- Logo -->
+            <div class="p-6 border-b border-primary-700">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-hospital text-3xl text-secondary-400"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">Clinique</h1>
+                        <p class="text-xs text-primary-200">Administration</p>
+                    </div>
+                </div>
             </div>
-            <button class="btn btn-primary" onclick="CliniqueApp.openModal('createUserModal')">
-                + Nouvel utilisateur
-            </button>
-        </div>
-        
-        <div id="alert-container"></div>
-        
-        <!-- Filters -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <form class="row" id="filterForm">
-                    <div class="col-3">
-                        <input type="text" class="form-control" placeholder="Rechercher..." 
-                               name="search" id="searchInput">
+            
+            <!-- User Profile -->
+            <div class="p-6 border-b border-primary-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        <c:choose>
+                            <c:when test="${not empty sessionScope.user}">
+                                ${sessionScope.user.firstName.substring(0,1)}${sessionScope.user.lastName.substring(0,1)}
+                            </c:when>
+                            <c:otherwise>AD</c:otherwise>
+                        </c:choose>
                     </div>
-                    <div class="col-2">
-                        <select class="form-control form-select" name="role" id="roleFilter">
-                            <option value="">Tous les rôles</option>
-                            <option value="ADMIN">Admin</option>
-                            <option value="DOCTOR">Docteur</option>
-                            <option value="PATIENT">Patient</option>
-                            <option value="STAFF">Personnel</option>
-                        </select>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold truncate">
+                            <c:choose>
+                                <c:when test="${not empty sessionScope.user}">
+                                    ${sessionScope.user.firstName} ${sessionScope.user.lastName}
+                                </c:when>
+                                <c:otherwise>Administrateur</c:otherwise>
+                            </c:choose>
+                        </p>
+                        <p class="text-xs text-primary-200 truncate">
+                            <c:choose>
+                                <c:when test="${not empty sessionScope.userEmail}">
+                                    ${sessionScope.userEmail}
+                                </c:when>
+                                <c:otherwise>admin@clinique.com</c:otherwise>
+                            </c:choose>
+                        </p>
                     </div>
-                    <div class="col-2">
-                        <select class="form-control form-select" name="status" id="statusFilter">
-                            <option value="">Tous les statuts</option>
-                            <option value="active">Actif</option>
-                            <option value="inactive">Inactif</option>
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <button type="submit" class="btn btn-secondary">Filtrer</button>
-                    </div>
-                </form>
+                </div>
             </div>
-        </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 overflow-y-auto">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                            <i class="fas fa-chart-line w-5"></i>
+                            <span class="font-medium">Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/users" class="flex items-center space-x-3 p-3 rounded-lg bg-primary-700/50 text-white">
+                            <i class="fas fa-users w-5"></i>
+                            <span class="font-medium">Utilisateurs</span>
+                            <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/specialties" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                            <i class="fas fa-stethoscope w-5"></i>
+                            <span class="font-medium">Spécialités</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/appointments" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            <span class="font-medium">Rendez-vous</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/reports" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                            <i class="fas fa-file-medical w-5"></i>
+                            <span class="font-medium">Rapports</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="mt-6 pt-6 border-t border-primary-700">
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/profile" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                                <i class="fas fa-cog w-5"></i>
+                                <span class="font-medium">Paramètres</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/logout" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-red-600/80 transition-colors text-primary-100 hover:text-white">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span class="font-medium">Déconnexion</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
         
-        <!-- Users Table -->
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nom complet</th>
-                                <th>Email</th>
-                                <th>Rôle</th>
-                                <th>Statut</th>
-                                <th>Date création</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach items="${users}" var="user">
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="flex items-center justify-between p-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h2>
+                        <p class="text-sm text-gray-500">Gérez tous les comptes utilisateurs de la clinique</p>
+                    </div>
+                    <button onclick="openAddUserModal()" class="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 font-semibold transition-colors shadow-lg shadow-primary-600/30">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Ajouter un utilisateur</span>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <i class="fas fa-users text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">1247</h3>
+                        <p class="text-blue-100">Total Utilisateurs</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-2xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <i class="fas fa-user-md text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">48</h3>
+                        <p class="text-secondary-100">Médecins</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <i class="fas fa-user-injured text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">892</h3>
+                        <p class="text-purple-100">Patients</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <i class="fas fa-user-tie text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">15</h3>
+                        <p class="text-orange-100">Personnel</p>
+                    </div>
+                </div>
+                
+                <!-- Filters & Search -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2">
+                            <div class="relative">
+                                <input type="text" id="search" placeholder="Rechercher par nom, email..." 
+                                       class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <select id="roleFilter" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                                <option value="">Tous les rôles</option>
+                                <option value="ADMIN">Admin</option>
+                                <option value="DOCTOR">Médecin</option>
+                                <option value="PATIENT">Patient</option>
+                                <option value="STAFF">Personnel</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="statusFilter" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                                <option value="">Tous les statuts</option>
+                                <option value="active">Actif</option>
+                                <option value="inactive">Inactif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Users Table -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <td>${user.id}</td>
-                                    <td>${user.firstName} ${user.lastName}</td>
-                                    <td>${user.email}</td>
-                                    <td>
-                                        <span class="badge badge-primary">${user.role}</span>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
+                                        <input type="checkbox" class="w-5 h-5 text-primary-600 rounded">
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Utilisateur</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Rôle</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Email</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Téléphone</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Statut</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Créé le</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <c:forEach items="${users}" var="user">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <input type="checkbox" class="w-5 h-5 text-primary-600 rounded">
                                     </td>
-                                    <td>
-                                        <span class="badge badge-${user.active ? 'success' : 'danger'}">
-                                            ${user.active ? 'Actif' : 'Inactif'}
-                                        </span>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
+                                                ${user.firstName.substring(0,1)}${user.lastName.substring(0,1)}
+                                            </div>
+                                            <div>
+                                                <div class="font-semibold text-gray-900">${user.firstName} ${user.lastName}</div>
+                                                <div class="text-sm text-gray-500">ID: ${user.id}</div>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td>${user.createdAt}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info" 
-                                                onclick="viewUser(${user.id})">
-                                            👁️
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <c:choose>
+                                            <c:when test="${user.role == 'ADMIN'}">
+                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-orange-100 text-orange-700">
+                                                    <i class="fas fa-user-shield mr-1"></i>Admin
+                                                </span>
+                                            </c:when>
+                                            <c:when test="${user.role == 'DOCTOR'}">
+                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-secondary-100 text-secondary-700">
+                                                    <i class="fas fa-user-md mr-1"></i>Médecin
+                                                </span>
+                                            </c:when>
+                                            <c:when test="${user.role == 'PATIENT'}">
+                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700">
+                                                    <i class="fas fa-user-injured mr-1"></i>Patient
+                                                </span>
+                                            </c:when>
+                                            <c:when test="${user.role == 'STAFF'}">
+                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-purple-100 text-purple-700">
+                                                    <i class="fas fa-user-tie mr-1"></i>Personnel
+                                                </span>
+                                            </c:when>
+                                        </c:choose>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <i class="fas fa-envelope text-gray-400 mr-2"></i>${user.email}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <i class="fas fa-phone text-gray-400 mr-2"></i>${user.phone}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <c:choose>
+                                            <c:when test="${user.active}">
+                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700">
+                                                    <i class="fas fa-check-circle mr-1"></i>Actif
+                                                </span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700">
+                                                    <i class="fas fa-times-circle mr-1"></i>Inactif
+                                                </span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        ${user.createdAt}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                                        <button onclick="viewUser(${user.id})" class="text-blue-600 hover:text-blue-700 font-semibold" title="Voir">
+                                            <i class="fas fa-eye"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-warning" 
-                                                onclick="editUser(${user.id})">
-                                            ✏️
+                                        <button onclick="editUser(${user.id})" class="text-primary-600 hover:text-primary-700 font-semibold" title="Modifier">
+                                            <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-${user.active ? 'danger' : 'success'}" 
-                                                onclick="toggleUserStatus(${user.id}, ${user.active})">
-                                            ${user.active ? '🚫' : '✅'}
+                                        <button onclick="toggleUserStatus(${user.id})" class="text-orange-600 hover:text-orange-700 font-semibold" title="Activer/Désactiver">
+                                            <i class="fas fa-toggle-on"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-secondary" 
-                                                onclick="resetPassword(${user.id})">
-                                            🔑
+                                        <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-700 font-semibold" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="flex items-center justify-between p-6 border-t border-gray-100">
+                        <div class="text-sm text-gray-600">
+                            Affichage de <span class="font-semibold">1</span> à <span class="font-semibold">20</span> sur <span class="font-semibold">1247</span> utilisateurs
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold">1</button>
+                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">2</button>
+                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">3</button>
+                            <span class="px-2">...</span>
+                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">63</button>
+                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Pagination -->
-                <div class="d-flex justify-between align-center mt-3">
-                    <div>
-                        Affichage ${startIndex} à ${endIndex} sur ${totalUsers} utilisateurs
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-secondary" ${currentPage == 1 ? 'disabled' : ''}>
-                            Précédent
-                        </button>
-                        <span class="ml-2 mr-2">Page ${currentPage} sur ${totalPages}</span>
-                        <button class="btn btn-sm btn-secondary" ${currentPage == totalPages ? 'disabled' : ''}>
-                            Suivant
+            </main>
+        </div>
+    </div>
+    
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="fixed inset-0 bg-gray-900/50" onclick="closeUserModal()"></div>
+            
+            <div class="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full z-10 max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-primary-600 to-primary-700 p-6 text-white sticky top-0 z-10">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xl font-bold" id="modalTitle">Ajouter un utilisateur</h3>
+                        <button onclick="closeUserModal()" class="text-white hover:text-gray-200 transition-colors">
+                            <i class="fas fa-times text-2xl"></i>
                         </button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </main>
-    
-    <!-- Create User Modal -->
-    <div class="modal" id="createUserModal">
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <h5 class="modal-title">Créer un utilisateur</h5>
-                <button class="close" onclick="CliniqueApp.closeModal('createUserModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="createUserForm">
-                    <div class="form-group">
-                        <label class="form-label required">Prénom</label>
-                        <input type="text" class="form-control" name="firstName" required>
+                
+                <!-- Modal Body -->
+                <form id="userForm" class="p-6">
+                    <input type="hidden" id="userId" name="userId">
+                    
+                    <div class="space-y-4">
+                        <!-- Role Selection -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-user-tag text-primary-600 mr-2"></i>Rôle <span class="text-red-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="role" value="PATIENT" class="peer hidden" required>
+                                    <div class="p-4 border-2 border-gray-300 rounded-xl text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                        <i class="fas fa-user-injured text-3xl text-blue-600 mb-2"></i>
+                                        <p class="font-semibold text-sm">Patient</p>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="role" value="DOCTOR" class="peer hidden">
+                                    <div class="p-4 border-2 border-gray-300 rounded-xl text-center peer-checked:border-secondary-600 peer-checked:bg-secondary-50 transition-all">
+                                        <i class="fas fa-user-md text-3xl text-secondary-600 mb-2"></i>
+                                        <p class="font-semibold text-sm">Médecin</p>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="role" value="STAFF" class="peer hidden">
+                                    <div class="p-4 border-2 border-gray-300 rounded-xl text-center peer-checked:border-purple-600 peer-checked:bg-purple-50 transition-all">
+                                        <i class="fas fa-user-tie text-3xl text-purple-600 mb-2"></i>
+                                        <p class="font-semibold text-sm">Personnel</p>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="role" value="ADMIN" class="peer hidden">
+                                    <div class="p-4 border-2 border-gray-300 rounded-xl text-center peer-checked:border-orange-600 peer-checked:bg-orange-50 transition-all">
+                                        <i class="fas fa-user-shield text-3xl text-orange-600 mb-2"></i>
+                                        <p class="font-semibold text-sm">Admin</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Personal Info -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-user text-primary-600 mr-2"></i>Prénom <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="firstName" required
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-user text-primary-600 mr-2"></i>Nom <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="lastName" required
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-envelope text-primary-600 mr-2"></i>Email <span class="text-red-500">*</span>
+                                </label>
+                                <input type="email" name="email" required
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-phone text-primary-600 mr-2"></i>Téléphone
+                                </label>
+                                <input type="tel" name="phone"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-key text-primary-600 mr-2"></i>Mot de passe <span class="text-red-500" id="passwordRequired">*</span>
+                                </label>
+                                <input type="password" name="password" id="password" minlength="8"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                                <p class="text-xs text-gray-500 mt-1">Minimum 8 caractères</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-toggle-on text-primary-600 mr-2"></i>Statut
+                                </label>
+                                <select name="active" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                                    <option value="true">Actif</option>
+                                    <option value="false">Inactif</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label required">Nom</label>
-                        <input type="text" class="form-control" name="lastName" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label required">Email</label>
-                        <input type="email" class="form-control" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label required">Rôle</label>
-                        <select class="form-control form-select" name="role" required>
-                            <option value="">Sélectionner</option>
-                            <option value="ADMIN">Admin</option>
-                            <option value="DOCTOR">Docteur</option>
-                            <option value="PATIENT">Patient</option>
-                            <option value="STAFF">Personnel</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label required">Mot de passe</label>
-                        <input type="password" class="form-control" name="password" minlength="8" required>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" name="active" checked>
-                        <label class="form-check-label">Compte actif</label>
+                    
+                    <!-- Modal Footer -->
+                    <div class="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                        <button type="button" onclick="closeUserModal()" class="px-6 py-3 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                            Annuler
+                        </button>
+                        <button type="submit" class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold transition-colors shadow-lg shadow-primary-600/30">
+                            <i class="fas fa-save mr-2"></i>Enregistrer
+                        </button>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="CliniqueApp.closeModal('createUserModal')">
-                    Annuler
-                </button>
-                <button class="btn btn-primary" onclick="createUser()">
-                    Créer
-                </button>
-            </div>
         </div>
     </div>
     
-    <!-- View User Modal -->
-    <div class="modal" id="viewUserModal">
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <h5 class="modal-title">Détails utilisateur</h5>
-                <button class="close" onclick="CliniqueApp.closeModal('viewUserModal')">&times;</button>
-            </div>
-            <div class="modal-body" id="userDetailsContent">
-                <!-- Content loaded dynamically -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="CliniqueApp.closeModal('viewUserModal')">
-                    Fermer
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <script src="${pageContext.request.contextPath}/js/main.js"></script>
     <script>
-        function createUser() {
-            if (!CliniqueApp.validateForm('createUserForm')) return;
-            
-            const formData = new FormData(document.getElementById('createUserForm'));
-            const data = Object.fromEntries(formData);
-            
-            CliniqueApp.fetchData('${pageContext.request.contextPath}/api/users', {
-                method: 'POST',
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                CliniqueApp.showAlert('Utilisateur créé avec succès', 'success');
-                CliniqueApp.closeModal('createUserModal');
-                setTimeout(() => location.reload(), 1500);
-            })
-            .catch(error => {
-                CliniqueApp.showAlert('Erreur lors de la création', 'danger');
-            });
+        // Modal functions
+        function openAddUserModal() {
+            document.getElementById('modalTitle').textContent = 'Ajouter un utilisateur';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('password').required = true;
+            document.getElementById('passwordRequired').classList.remove('hidden');
+            document.getElementById('userModal').classList.remove('hidden');
         }
         
-        function viewUser(userId) {
-            CliniqueApp.showLoading('userDetailsContent');
-            CliniqueApp.openModal('viewUserModal');
-            
-            CliniqueApp.fetchData(`${pageContext.request.contextPath}/api/users/${userId}`)
-                .then(user => {
-                    document.getElementById('userDetailsContent').innerHTML = `
-                        <div class="row">
-                            <div class="col-6">
-                                <p><strong>ID:</strong> ${user.id}</p>
-                                <p><strong>Nom:</strong> ${user.firstName} ${user.lastName}</p>
-                                <p><strong>Email:</strong> ${user.email}</p>
-                            </div>
-                            <div class="col-6">
-                                <p><strong>Rôle:</strong> <span class="badge badge-primary">${user.role}</span></p>
-                                <p><strong>Statut:</strong> <span class="badge badge-${user.active ? 'success' : 'danger'}">${user.active ? 'Actif' : 'Inactif'}</span></p>
-                                <p><strong>Créé le:</strong> ${CliniqueApp.formatDate(user.createdAt)}</p>
-                            </div>
-                        </div>
-                    `;
-                });
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
         }
         
         function editUser(userId) {
-            // Redirect to edit page or open edit modal
-            window.location.href = `${pageContext.request.contextPath}/admin/users/edit?id=${userId}`;
+            document.getElementById('modalTitle').textContent = 'Modifier l\'utilisateur';
+            document.getElementById('userId').value = userId;
+            document.getElementById('password').required = false;
+            document.getElementById('passwordRequired').classList.add('hidden');
+            
+            // Fetch user data and populate form (AJAX call here)
+            // For demo purposes:
+            document.getElementById('userModal').classList.remove('hidden');
         }
         
-        function toggleUserStatus(userId, currentStatus) {
-            const action = currentStatus ? 'désactiver' : 'activer';
-            CliniqueApp.confirmAction(`Voulez-vous vraiment ${action} cet utilisateur ?`, () => {
-                CliniqueApp.fetchData(`${pageContext.request.contextPath}/api/users/${userId}/toggle-status`, {
-                    method: 'PUT'
-                })
-                .then(() => {
-                    CliniqueApp.showAlert(`Utilisateur ${action === 'désactiver' ? 'désactivé' : 'activé'} avec succès`, 'success');
-                    setTimeout(() => location.reload(), 1500);
-                });
-            });
+        function viewUser(userId) {
+            window.location.href = '${pageContext.request.contextPath}/admin/users/' + userId;
         }
         
-        function resetPassword(userId) {
-            CliniqueApp.confirmAction('Voulez-vous vraiment réinitialiser le mot de passe ?', () => {
-                CliniqueApp.fetchData(`${pageContext.request.contextPath}/api/users/${userId}/reset-password`, {
-                    method: 'POST'
-                })
-                .then(() => {
-                    CliniqueApp.showAlert('Email de réinitialisation envoyé', 'success');
-                });
-            });
+        function toggleUserStatus(userId) {
+            if (confirm('Êtes-vous sûr de vouloir changer le statut de cet utilisateur ?')) {
+                // AJAX call to toggle status
+                console.log('Toggle status for user:', userId);
+            }
         }
+        
+        function deleteUser(userId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
+                // AJAX call to delete user
+                console.log('Delete user:', userId);
+            }
+        }
+        
+        // Form submission
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // AJAX call to save user
+            console.log('Saving user...');
+            closeUserModal();
+        });
+        
+        // Search and filters
+        document.getElementById('search').addEventListener('input', function() {
+            // Implement search logic
+            console.log('Search:', this.value);
+        });
+        
+        document.getElementById('roleFilter').addEventListener('change', function() {
+            // Implement role filter logic
+            console.log('Filter by role:', this.value);
+        });
+        
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            // Implement status filter logic
+            console.log('Filter by status:', this.value);
+        });
     </script>
 </body>
 </html>

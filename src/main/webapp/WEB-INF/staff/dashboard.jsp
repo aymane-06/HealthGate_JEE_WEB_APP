@@ -5,331 +5,468 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de bord Personnel - Clinique Digitale</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-</head>
-<body>
-    <jsp:include page="../components/sidebar.jsp" />
+    <title>Accueil - Personnel Clinique</title>
     
-    <main class="main-content">
-        <div class="d-flex justify-between align-center mb-4">
-            <div>
-                <h1>Tableau de bord Personnel</h1>
-                <p class="text-muted">Gestion administrative</p>
-            </div>
-            <button class="btn btn-primary" onclick="CliniqueApp.openModal('scheduleAppointmentModal')">
-                + Planifier un rendez-vous
-            </button>
-        </div>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#e6f2ff', 100: '#b3d9ff', 200: '#80bfff',
+                            300: '#4da6ff', 400: '#1a8cff', 500: '#0073e6',
+                            600: '#0066CC', 700: '#0052a3', 800: '#003d7a',
+                            900: '#002952',
+                        },
+                        staff: {
+                            50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff',
+                            300: '#d8b4fe', 400: '#c084fc', 500: '#a855f7',
+                            600: '#9333ea', 700: '#7e22ce', 800: '#6b21a8',
+                            900: '#581c87',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
         
-        <div id="alert-container"></div>
-        
-        <!-- Quick Stats -->
-        <div class="row mb-4">
-            <div class="col-3">
-                <div class="stat-card">
-                    <div class="stat-value">${stats.todayAppointments}</div>
-                    <div class="stat-label">RDV aujourd'hui</div>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="stat-card warning">
-                    <div class="stat-value">${stats.waitingList}</div>
-                    <div class="stat-label">Liste d'attente</div>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="stat-card success">
-                    <div class="stat-value">${stats.scheduledToday}</div>
-                    <div class="stat-label">Planifiés ce jour</div>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="stat-card danger">
-                    <div class="stat-value">${stats.canceledToday}</div>
-                    <div class="stat-label">Annulés ce jour</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Appointments Overview -->
-        <div class="row mb-4">
-            <div class="col-8">
-                <div class="card">
-                    <div class="card-header d-flex justify-between align-center">
-                        <h5>Rendez-vous du jour</h5>
-                        <div>
-                            <select class="form-control form-select" id="doctorFilter" 
-                                    onchange="filterAppointments()" style="display: inline-block; width: auto;">
-                                <option value="">Tous les docteurs</option>
-                                <c:forEach items="${doctors}" var="doctor">
-                                    <option value="${doctor.id}">${doctor.name}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Heure</th>
-                                        <th>Patient</th>
-                                        <th>Docteur</th>
-                                        <th>Type</th>
-                                        <th>Statut</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach items="${todayAppointments}" var="apt">
-                                        <tr>
-                                            <td><strong>${apt.time}</strong></td>
-                                            <td>
-                                                ${apt.patientName}<br>
-                                                <small class="text-muted">${apt.patientPhone}</small>
-                                            </td>
-                                            <td>Dr. ${apt.doctorName}</td>
-                                            <td><span class="badge badge-info">${apt.type}</span></td>
-                                            <td>
-                                                <span class="badge badge-${apt.status == 'PLANNED' ? 'primary' : 
-                                                    apt.status == 'DONE' ? 'success' : 'danger'}">
-                                                    ${apt.status}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-info" 
-                                                        onclick="viewAppointment('${apt.id}')">
-                                                    👁️
-                                                </button>
-                                                <c:if test="${apt.status == 'PLANNED'}">
-                                                    <button class="btn btn-sm btn-warning" 
-                                                            onclick="rescheduleAppointment('${apt.id}')">
-                                                        📅
-                                                    </button>
-                                                </c:if>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gradient-to-b from-staff-900 to-staff-800 text-white flex-shrink-0 hidden md:flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-staff-700">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-hospital text-3xl text-staff-400"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">Clinique</h1>
+                        <p class="text-xs text-staff-200">Espace Personnel</p>
                     </div>
                 </div>
             </div>
             
-            <div class="col-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5>Actions rapides</h5>
+            <div class="p-6 border-b border-staff-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-staff-500 to-staff-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        ${sessionScope.user.firstName.substring(0,1)}${sessionScope.user.lastName.substring(0,1)}
                     </div>
-                    <div class="card-body">
-                        <button class="btn btn-primary btn-block mb-2" 
-                                onclick="CliniqueApp.openModal('scheduleAppointmentModal')">
-                            📅 Planifier RDV
-                        </button>
-                        <a href="${pageContext.request.contextPath}/staff/waiting-list.jsp" 
-                           class="btn btn-outline-primary btn-block mb-2">
-                            ⏳ Liste d'attente (${stats.waitingList})
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold truncate">${sessionScope.user.firstName} ${sessionScope.user.lastName}</p>
+                        <p class="text-xs text-staff-200 truncate">Personnel</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 p-4 overflow-y-auto">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="${pageContext.request.contextPath}/staff/dashboard" class="flex items-center space-x-3 p-3 rounded-lg bg-staff-700/50 text-white">
+                            <i class="fas fa-chart-line w-5"></i>
+                            <span class="font-medium">Accueil</span>
                         </a>
-                        <button class="btn btn-outline-primary btn-block" 
-                                onclick="printSchedule()">
-                            🖨️ Imprimer planning
-                        </button>
-                    </div>
-                </div>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/staff/waiting-list" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-staff-700/30 transition-colors text-staff-100 hover:text-white">
+                            <i class="fas fa-users w-5"></i>
+                            <span class="font-medium">Salle d'attente</span>
+                            <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">5</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/staff/appointments" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-staff-700/30 transition-colors text-staff-100 hover:text-white">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            <span class="font-medium">Rendez-vous</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/staff/patients" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-staff-700/30 transition-colors text-staff-100 hover:text-white">
+                            <i class="fas fa-user-injured w-5"></i>
+                            <span class="font-medium">Patients</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/staff/doctors" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-staff-700/30 transition-colors text-staff-100 hover:text-white">
+                            <i class="fas fa-user-md w-5"></i>
+                            <span class="font-medium">Médecins</span>
+                        </a>
+                    </li>
+                </ul>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Notifications</h5>
-                    </div>
-                    <div class="card-body">
-                        <c:forEach items="${notifications}" var="notif">
-                            <div class="alert alert-${notif.type} mb-2">
-                                <small><strong>${notif.time}</strong></small><br>
-                                ${notif.message}
-                            </div>
-                        </c:forEach>
-                    </div>
+                <div class="mt-6 pt-6 border-t border-staff-700">
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/profile" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-staff-700/30 transition-colors text-staff-100 hover:text-white">
+                                <i class="fas fa-user-circle w-5"></i>
+                                <span class="font-medium">Mon Profil</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/logout" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-red-600/80 transition-colors text-staff-100 hover:text-white">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span class="font-medium">Déconnexion</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-            </div>
-        </div>
+            </nav>
+        </aside>
         
-        <!-- Recent Activity -->
-        <div class="card">
-            <div class="card-header">
-                <h5>Activité récente</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Date & Heure</th>
-                                <th>Action</th>
-                                <th>Patient</th>
-                                <th>Docteur</th>
-                                <th>Par</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach items="${recentActivity}" var="activity">
-                                <tr>
-                                    <td>${activity.timestamp}</td>
-                                    <td>
-                                        <span class="badge badge-${activity.actionType == 'CREATE' ? 'success' : 
-                                            activity.actionType == 'CANCEL' ? 'danger' : 'warning'}">
-                                            ${activity.action}
-                                        </span>
-                                    </td>
-                                    <td>${activity.patientName}</td>
-                                    <td>Dr. ${activity.doctorName}</td>
-                                    <td>${activity.performedBy}</td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
-    
-    <!-- Schedule Appointment Modal -->
-    <div class="modal" id="scheduleAppointmentModal">
-        <div class="modal-dialog" style="max-width: 800px;">
-            <div class="modal-header">
-                <h5 class="modal-title">Planifier un rendez-vous</h5>
-                <button class="close" onclick="CliniqueApp.closeModal('scheduleAppointmentModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="scheduleAppointmentForm">
-                    <div class="row">
-                        <div class="col-6">
-                            <h6>Informations patient</h6>
-                            <div class="form-group">
-                                <label class="form-label">Patient existant</label>
-                                <select class="form-control form-select" id="existingPatient" 
-                                        onchange="toggleNewPatient()">
-                                    <option value="">-- Nouveau patient --</option>
-                                    <c:forEach items="${patients}" var="patient">
-                                        <option value="${patient.id}">${patient.name} - ${patient.cin}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                            
-                            <div id="newPatientFields">
-                                <div class="form-group">
-                                    <label class="form-label required">Nom complet</label>
-                                    <input type="text" class="form-control" name="patientName">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label required">CIN</label>
-                                    <input type="text" class="form-control" name="patientCin">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label required">Téléphone</label>
-                                    <input type="tel" class="form-control" name="patientPhone">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-6">
-                            <h6>Détails du rendez-vous</h6>
-                            <div class="form-group">
-                                <label class="form-label required">Docteur</label>
-                                <select class="form-control form-select" name="doctorId" required>
-                                    <option value="">Sélectionner</option>
-                                    <c:forEach items="${doctors}" var="doctor">
-                                        <option value="${doctor.id}">${doctor.name} - ${doctor.specialty}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Date</label>
-                                <input type="date" class="form-control" name="date" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Heure</label>
-                                <input type="time" class="form-control" name="time" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Type</label>
-                                <select class="form-control form-select" name="type" required>
-                                    <option value="CONSULTATION">Consultation</option>
-                                    <option value="FOLLOW_UP">Suivi</option>
-                                    <option value="EMERGENCY">Urgence</option>
-                                </select>
-                            </div>
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="menu-toggle" class="md:hidden text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-bars text-2xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Tableau de bord - Accueil</h2>
+                            <p class="text-sm text-gray-500">Gestion de la réception et des rendez-vous</p>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label class="form-label">Notes</label>
-                        <textarea class="form-control" name="notes" rows="2"></textarea>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-gray-600">
+                            <i class="far fa-clock mr-2"></i>
+                            <span id="current-time" class="font-semibold"></span>
+                        </div>
+                        <div class="relative">
+                            <button class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                        </div>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="CliniqueApp.closeModal('scheduleAppointmentModal')">
-                    Annuler
-                </button>
-                <button class="btn btn-primary" onclick="scheduleAppointment()">
-                    Planifier
-                </button>
-            </div>
+                </div>
+            </header>
+            
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-gradient-to-br from-staff-500 to-staff-600 rounded-2xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <i class="fas fa-calendar-check text-2xl"></i>
+                            </div>
+                            <span class="text-sm font-semibold bg-white/20 px-3 py-1 rounded-full">Aujourd'hui</span>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">23</h3>
+                        <p class="text-staff-100">Rendez-vous</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <i class="fas fa-users text-2xl"></i>
+                            </div>
+                            <span class="text-sm font-semibold bg-white/20 px-3 py-1 rounded-full animate-pulse">En attente</span>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">5</h3>
+                        <p class="text-red-100">Patients</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <i class="fas fa-check-circle text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">15</h3>
+                        <p class="text-green-100">Consultations terminées</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <i class="fas fa-user-md text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">8</h3>
+                        <p class="text-blue-100">Médecins disponibles</p>
+                    </div>
+                </div>
+                
+                <!-- Waiting Room & Today's Appointments -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Waiting Room -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Salle d'attente</h3>
+                                <p class="text-sm text-gray-500">5 patients en attente</p>
+                            </div>
+                            <a href="${pageContext.request.contextPath}/staff/waiting-list" class="text-sm font-semibold text-staff-600 hover:text-staff-700">
+                                Gérer <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                        <div class="p-6 space-y-3 max-h-96 overflow-y-auto">
+                            <div class="flex items-center space-x-4 p-4 bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 rounded-xl">
+                                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                    AB
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-900">Ahmed Benali</p>
+                                    <p class="text-sm text-gray-600">Dr. Alami - 14:30</p>
+                                    <p class="text-xs text-red-600 font-semibold mt-1">En attente: 15 min</p>
+                                </div>
+                                <button class="px-4 py-2 bg-staff-600 text-white rounded-lg hover:bg-staff-700 transition-colors text-sm font-semibold">
+                                    Appeler
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4 p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-yellow-500 rounded-xl">
+                                <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                    FK
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-900">Fatima Khalil</p>
+                                    <p class="text-sm text-gray-600">Dr. Bennani - 15:00</p>
+                                    <p class="text-xs text-yellow-600 font-semibold mt-1">En attente: 8 min</p>
+                                </div>
+                                <button class="px-4 py-2 bg-staff-600 text-white rounded-lg hover:bg-staff-700 transition-colors text-sm font-semibold">
+                                    Appeler
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4 p-4 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 rounded-xl">
+                                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                    MY
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-900">Mohamed Youssef</p>
+                                    <p class="text-sm text-gray-600">Dr. Idrissi - 15:15</p>
+                                    <p class="text-xs text-green-600 font-semibold mt-1">Vient d'arriver</p>
+                                </div>
+                                <button class="px-4 py-2 bg-staff-600 text-white rounded-lg hover:bg-staff-700 transition-colors text-sm font-semibold">
+                                    Appeler
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6 border-t border-gray-100">
+                            <button class="w-full bg-staff-600 text-white rounded-lg py-3 font-semibold hover:bg-staff-700 transition-colors">
+                                <i class="fas fa-user-plus mr-2"></i>Enregistrer un patient
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="space-y-6">
+                        <div class="bg-gradient-to-br from-staff-600 to-staff-700 rounded-2xl shadow-lg p-6 text-white">
+                            <h3 class="text-lg font-bold mb-4">Actions rapides</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-4 text-center transition-all">
+                                    <i class="fas fa-calendar-plus text-2xl mb-2"></i>
+                                    <p class="text-sm font-semibold">Nouveau RDV</p>
+                                </button>
+                                <button class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-4 text-center transition-all">
+                                    <i class="fas fa-user-plus text-2xl mb-2"></i>
+                                    <p class="text-sm font-semibold">Ajouter Patient</p>
+                                </button>
+                                <button class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-4 text-center transition-all">
+                                    <i class="fas fa-phone text-2xl mb-2"></i>
+                                    <p class="text-sm font-semibold">Appeler Patient</p>
+                                </button>
+                                <button class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-4 text-center transition-all">
+                                    <i class="fas fa-file-invoice text-2xl mb-2"></i>
+                                    <p class="text-sm font-semibold">Générer Facture</p>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Disponibilité des médecins</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">Dr. Alami</p>
+                                            <p class="text-xs text-gray-500">Cardiologue</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Disponible</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">Dr. Bennani</p>
+                                            <p class="text-xs text-gray-500">Neurologue</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-semibold text-orange-700 bg-orange-100 px-3 py-1 rounded-full">En consultation</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">Dr. Idrissi</p>
+                                            <p class="text-xs text-gray-500">Généraliste</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Disponible</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Today's Appointments Schedule -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Planning du jour</h3>
+                                <p class="text-sm text-gray-500">Mercredi 12 Octobre 2024</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-print mr-2"></i>Imprimer
+                                </button>
+                                <button class="px-4 py-2 bg-staff-600 text-white rounded-lg text-sm font-semibold hover:bg-staff-700 transition-colors">
+                                    <i class="fas fa-filter mr-2"></i>Filtrer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Heure</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Patient</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Médecin</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Statut</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">09:00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-gradient-to-br from-staff-500 to-staff-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">
+                                                SK
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-gray-900">Sara Khalil</div>
+                                                <div class="text-sm text-gray-500">0612345678</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dr. Alami</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">Consultation</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">Terminé</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                                        <button class="text-staff-600 hover:text-staff-700 font-semibold">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-blue-600 hover:text-blue-700 font-semibold">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition-colors bg-yellow-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">14:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">
+                                                AB
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-gray-900">Ahmed Benali</div>
+                                                <div class="text-sm text-gray-500">0623456789</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dr. Alami</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">Contrôle</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-700 animate-pulse">En cours</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                                        <button class="text-staff-600 hover:text-staff-700 font-semibold">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-blue-600 hover:text-blue-700 font-semibold">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">15:00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">
+                                                FK
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-gray-900">Fatima Khalil</div>
+                                                <div class="text-sm text-gray-500">0634567890</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dr. Bennani</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">Consultation</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">Confirmé</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                                        <button class="text-staff-600 hover:text-staff-700 font-semibold">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-blue-600 hover:text-blue-700 font-semibold">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            </main>
         </div>
     </div>
     
-    <script src="${pageContext.request.contextPath}/js/main.js"></script>
     <script>
-        function toggleNewPatient() {
-            const existingPatient = document.getElementById('existingPatient').value;
-            const newPatientFields = document.getElementById('newPatientFields');
-            
-            if (existingPatient) {
-                newPatientFields.style.display = 'none';
-                newPatientFields.querySelectorAll('input').forEach(input => input.required = false);
-            } else {
-                newPatientFields.style.display = 'block';
-                newPatientFields.querySelectorAll('input').forEach(input => input.required = true);
-            }
-        }
-        
-        function scheduleAppointment() {
-            if (!CliniqueApp.validateForm('scheduleAppointmentForm')) return;
-            
-            const formData = new FormData(document.getElementById('scheduleAppointmentForm'));
-            const data = Object.fromEntries(formData);
-            data.patientId = document.getElementById('existingPatient').value;
-            
-            CliniqueApp.fetchData('${pageContext.request.contextPath}/api/staff/appointments', {
-                method: 'POST',
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                CliniqueApp.showAlert('Rendez-vous planifié avec succès', 'success');
-                CliniqueApp.closeModal('scheduleAppointmentModal');
-                setTimeout(() => location.reload(), 1500);
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('fr-FR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
             });
+            document.getElementById('current-time').textContent = timeString;
         }
-        
-        function viewAppointment(appointmentId) {
-            window.location.href = `${pageContext.request.contextPath}/staff/appointment-details?id=${appointmentId}`;
-        }
-        
-        function rescheduleAppointment(appointmentId) {
-            window.location.href = `${pageContext.request.contextPath}/staff/reschedule?id=${appointmentId}`;
-        }
-        
-        function printSchedule() {
-            window.print();
-        }
-        
-        function filterAppointments() {
-            // Implement filtering logic
-            const doctorId = document.getElementById('doctorFilter').value;
-            window.location.href = `${pageContext.request.contextPath}/staff/dashboard.jsp?doctorId=${doctorId}`;
-        }
+        updateTime();
+        setInterval(updateTime, 1000);
     </script>
 </body>
 </html>

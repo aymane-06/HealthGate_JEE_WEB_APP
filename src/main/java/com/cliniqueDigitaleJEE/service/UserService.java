@@ -38,11 +38,11 @@ public class UserService {
 
     private String hashPassword(String password) {
 
-        return org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt());
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     private boolean checkPassword(String rawPassword, String hashedPassword) {
 
-        return org.mindrot.jbcrypt.BCrypt.checkpw(rawPassword, hashedPassword);
+        return BCrypt.checkpw(rawPassword, hashedPassword);
     }
 }
