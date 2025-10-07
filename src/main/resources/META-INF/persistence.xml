@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+
+    <persistence-unit name="cliniquePU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Entity Classes -->
+        <class>com.cliniqueDigitaleJEE.model.User</class>
+        <class>com.cliniqueDigitaleJEE.model.Admin</class>
+        <class>com.cliniqueDigitaleJEE.model.Doctor</class>
+        <class>com.cliniqueDigitaleJEE.model.Patient</class>
+        <class>com.cliniqueDigitaleJEE.model.STAFF</class>
+        <class>com.cliniqueDigitaleJEE.model.Department</class>
+        <class>com.cliniqueDigitaleJEE.model.Specialty</class>
+        <class>com.cliniqueDigitaleJEE.model.Appointment</class>
+        <class>com.cliniqueDigitaleJEE.model.Availability</class>
+        <class>com.cliniqueDigitaleJEE.model.MedicalNote</class>
+
+        <properties>
+            <!-- Database Connection Settings -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/cleniqueDigitale"/>
+            <property name="jakarta.persistence.jdbc.user" value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value="root"/>
+
+            <!-- Hibernate Settings -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+
+            <!-- Auto-create/update tables -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+            <!-- Show SQL in console -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+
+            <!-- Use comments in SQL -->
+            <property name="hibernate.use_sql_comments" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>
+

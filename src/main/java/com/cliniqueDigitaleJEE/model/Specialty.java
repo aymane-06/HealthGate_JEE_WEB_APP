@@ -1,0 +1,81 @@
+package com.cliniqueDigitaleJEE.model;
+
+import jakarta.persistence.*;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = "specialties")
+public class Specialty {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+    @Column(unique = true, nullable = false)
+    private String code;
+    @Column(nullable = false)
+    private String name;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = true)
+    private Department department;
+    @OneToMany(mappedBy = "specialty")
+    private List<Doctor> doctors;
+
+    public Specialty() {}
+
+    public Specialty(String code, String name, String description, Department department) {
+        this.code = code;
+        this.name = name;
+        this.description = description;
+        this.department = department;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    public List<Doctor> getDoctors() {
+        return doctors;
+    }
+
+    public void setDoctors(List<Doctor> doctors) {
+        this.doctors = doctors;
+    }
+}

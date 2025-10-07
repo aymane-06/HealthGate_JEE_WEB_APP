@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:15
+    container_name: clinique-db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: cleniqueDigitale
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: clinique_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bank.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  tomcat:
+    image: tomcat:10.1-jdk21
+    container_name: clinique_tomcat
+    ports:
+      - "8081:8080"
+      - "8000:8000"
+    environment:
+      - JPDA_ADDRESS=*:8000
+      - JPDA_TRANSPORT=dt_socket
+    volumes:
+      # Mount the exploded webapp directory for hot reload
+      - ./src/main/webapp:/usr/local/tomcat/webapps/ROOT
+      # Mount compiled classes for auto-reload (enable auto-build in IDE)
+      - ./target/classes:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes
+      # Mount lib directory for dependencies
+      - ./target/CliniqueDigitaleJEE/WEB-INF/lib:/usr/local/tomcat/webapps/ROOT/WEB-INF/lib
+
+    command: catalina.sh jpda run  # Run in debug mode
+    depends_on:
+      - db
+
+volumes:
+  db_data:

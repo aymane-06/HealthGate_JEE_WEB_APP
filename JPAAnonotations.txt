@@ -1,0 +1,61 @@
+--Methode level annotations
+@PrePersist
+Before INSERT
+Set ID, timestamps, defaults
+@PostPersist
+After INSERT
+Logging, notifications
+@PreUpdate
+Before UPDATE
+Update timestamps, validation
+@PostUpdate
+After UPDATE
+Logging, cache invalidation
+@PostLoad
+After SELECT
+Compute derived fields
+@PreRemove
+Before DELETE
+Validation, prevent deletion
+@PostRemove
+After DELETE
+Cleanup, logging
+@Access(PROPERTY)
+During all operations
+Use getters/setters for JPA mapping
+@Access(FIELD)
+During all operations
+Use fields directly (default)
+
+--Class level annotations
+@Entity
+@Table
+@Inheritance
+@DiscriminatorColumn
+@DiscriminatorValue
+@MappedSuperclass
+@Embeddable
+@AttributeOverride
+@AttributeOverrides
+@NamedQuery
+
+--Field level annotations
+@Id
+@Version
+@Column
+@Transient
+@ElementCollection
+@Enumerated
+@Lob
+@Basic
+@JoinColumn
+@JoinColumns
+@ManyToOne
+@OneToOne
+@OneToMany
+@ManyToMany
+@JoinTable
+@MapsId
+@SequenceGenerator
+@GeneratedValue
+@SequenceGenerator
