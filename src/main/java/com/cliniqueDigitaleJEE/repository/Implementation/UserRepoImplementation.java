@@ -4,14 +4,13 @@ import com.cliniqueDigitaleJEE.model.User;
 import com.cliniqueDigitaleJEE.repository.Interfaces.UserRepository;
 
 import jakarta.ejb.Singleton;
-import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import java.util.List;
 import java.util.UUID;
 
-@Stateless
+
 @Singleton
 public class UserRepoImplementation implements UserRepository {
 

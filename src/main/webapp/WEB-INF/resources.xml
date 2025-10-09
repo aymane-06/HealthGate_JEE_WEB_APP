@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- PostgreSQL DataSource for TomEE -->
+    <Resource id="cliniqueDS" type="DataSource">
+        JdbcDriver org.postgresql.Driver
+        JdbcUrl jdbc:postgresql://db:5432/cleniqueDigitale
+        UserName root
+        Password root
+        JtaManaged true
+        MaxActive 20
+        MaxIdle 10
+        MaxWait 10000
+    </Resource>
+</resources>

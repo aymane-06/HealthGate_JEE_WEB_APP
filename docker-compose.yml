@@ -23,7 +23,7 @@ services:
       - db
 
   tomcat:
-    image: tomcat:10.1-jdk21
+    image: tomee:10.0.0-M3-webprofile
     container_name: clinique_tomcat
     ports:
       - "8081:8080"
@@ -32,14 +32,9 @@ services:
       - JPDA_ADDRESS=*:8000
       - JPDA_TRANSPORT=dt_socket
     volumes:
-      # Mount the exploded webapp directory for hot reload
-      - ./src/main/webapp:/usr/local/tomcat/webapps/ROOT
-      # Mount compiled classes for auto-reload (enable auto-build in IDE)
-      - ./target/classes:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes
-      # Mount lib directory for dependencies
-      - ./target/CliniqueDigitaleJEE/WEB-INF/lib:/usr/local/tomcat/webapps/ROOT/WEB-INF/lib
-
-    command: catalina.sh jpda run  # Run in debug mode
+      # Deploy the WAR file instead of mounting directories
+      - ./target/CliniqueDigitaleJEE.war:/usr/local/tomee/webapps/CliniqueDigitaleJEE.war
+    command: catalina.sh jpda run
     depends_on:
       - db
 

@@ -21,8 +21,7 @@ public class AdminDashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(true); // Changed to true to always create session
         
-        // TEMPORARILY DISABLED FOR UI TESTING - RE-ENABLE IN PRODUCTION!
-        /*
+        
         // Check if user is logged in and has ADMIN role
         if (session == null || session.getAttribute("user") == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
@@ -34,23 +33,9 @@ public class AdminDashboardServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/403");
             return;
         }
-        */
         
-        // Create mock user for UI testing
-        if (session.getAttribute("user") == null) {
-            Map<String, Object> mockUser = new HashMap<>();
-            mockUser.put("id", 1L);
-            mockUser.put("firstName", "Mohammed");
-            mockUser.put("lastName", "Alami");
-            mockUser.put("email", "admin@clinique.ma");
-            mockUser.put("role", "ADMIN");
-            mockUser.put("active", true);
-            mockUser.put("createdAt", "01/04/2025 10:00");
-            mockUser.put("lastLogin", "07/10/2025 19:30");
-            session.setAttribute("user", mockUser);
-            session.setAttribute("userRole", "ADMIN");
-            session.setAttribute("userEmail", "admin@clinique.ma");
-        }
+        
+      
         
         // TODO: Fetch real statistics from your service layer
         Map<String, Object> stats = getMockStatistics();

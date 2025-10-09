@@ -1,19 +1,34 @@
 package com.cliniqueDigitaleJEE.controller;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Validation;
 
 import java.io.IOException;
+
+import com.cliniqueDigitaleJEE.dto.UserDTO;
+import com.cliniqueDigitaleJEE.mapper.UserMapper;
+import com.cliniqueDigitaleJEE.model.User;
+import com.cliniqueDigitaleJEE.service.UserService;
 
 /**
  * LoginServlet - Handles login page display and authentication
  */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private UserMapper userMapper;
+
+
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -34,25 +49,20 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String email = req.getParameter("email");
         String password = req.getParameter("password");
-        String remember = req.getParameter("remember");
-        
-        // TODO: Implement actual authentication logic with your service layer
-        // For now, this is a mock implementation
         
         try {
             // Mock authentication - replace with actual service call
-            boolean isAuthenticated = authenticateUser(email, password);
-            
-            if (isAuthenticated) {
+            User user = userService.authenticate(email, password);
+
+
+            if (user != null) {
                 HttpSession session = req.getSession(true);
+                UserDTO userDTO = userMapper.toDTO(user);
                 
                 // Mock user data - replace with actual user from database
-                session.setAttribute("user", createMockUser(email));
+                session.setAttribute("user", userDTO);
                 session.setAttribute("userEmail", email);
-                session.setAttribute("userRole", determineMockRole(email));
-                
-                // Set session timeout (30 minutes)
-                session.setMaxInactiveInterval(30 * 60);
+                session.setAttribute("userRole", user.getRole());
                 
                 // Redirect based on role
                 String role = (String) session.getAttribute("userRole");
@@ -67,22 +77,4 @@ public class LoginServlet extends HttpServlet {
         }
     }
     
-    // Mock methods - replace with actual service layer calls
-    private boolean authenticateUser(String email, String password) {
-        // TODO: Call your authentication service
-        return email != null && !email.isEmpty() && password != null && !password.isEmpty();
-    }
-    
-    private Object createMockUser(String email) {
-        // TODO: Return actual user object from database
-        return new Object(); // Placeholder
-    }
-    
-    private String determineMockRole(String email) {
-        // Mock role determination based on email
-        if (email.contains("admin")) return "ADMIN";
-        if (email.contains("doctor")) return "DOCTOR";
-        if (email.contains("staff")) return "STAFF";
-        return "PATIENT";
-    }
 }

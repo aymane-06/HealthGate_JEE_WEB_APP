@@ -29,6 +29,12 @@ public class UserService {
     }
 
     public User authenticate(String email, String password) {
+
+        if (email == null || password == null) {
+            return null;
+        }
+
+
         User user = userRepository.findByEmail(email);
         if (user != null && checkPassword(password, user.getPassword())) {
             return user;

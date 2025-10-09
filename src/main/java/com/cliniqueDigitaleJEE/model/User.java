@@ -1,7 +1,7 @@
 package com.cliniqueDigitaleJEE.model;
 
 import com.cliniqueDigitaleJEE.model.ENUMS.Role;
-
+import jakarta.validation.constraints.Email;  // ✅ AJOUTEZ CETTE LIGNE
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -15,6 +15,7 @@ public abstract class User {
     protected UUID id;
     @Column(nullable = true)
     protected String name;
+    @Email(message = "Email should be valid")
     @Column(unique = true , nullable = false)
     protected String email;
     @Column(nullable = false)
