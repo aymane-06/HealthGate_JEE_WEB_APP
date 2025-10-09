@@ -48,6 +48,7 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-primary-900 via-primary-700 to-secondary-600 min-h-screen flex items-center justify-center p-4">
+    <!-- TEST CHANGE -->
     
     <!-- Background Pattern -->
     <div class="absolute inset-0 opacity-10 overflow-hidden">
@@ -90,9 +91,9 @@
                 </c:if>
                 
                 <!-- Role Selection -->
-                <div class="mb-8">
+                <div class="mb-8 text-center">
                     <label class="block text-sm font-bold text-gray-700 mb-4">Je m'inscris en tant que :</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="flex justify-center">
                         <label class="role-card cursor-pointer">
                             <input type="radio" name="role" value="PATIENT" class="hidden peer" checked>
                             <div class="border-2 border-gray-200 rounded-xl p-4 text-center transition-all peer-checked:border-primary-600 peer-checked:bg-primary-50 hover:border-primary-300">
@@ -101,39 +102,6 @@
                                 </div>
                                 <p class="font-semibold text-gray-900">Patient</p>
                                 <p class="text-xs text-gray-500 mt-1">Prendre RDV</p>
-                            </div>
-                        </label>
-                        
-                        <label class="role-card cursor-pointer">
-                            <input type="radio" name="role" value="DOCTOR" class="hidden peer">
-                            <div class="border-2 border-gray-200 rounded-xl p-4 text-center transition-all peer-checked:border-secondary-600 peer-checked:bg-secondary-50 hover:border-secondary-300">
-                                <div class="bg-secondary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 peer-checked:bg-secondary-200">
-                                    <i class="fas fa-user-md text-2xl text-secondary-600"></i>
-                                </div>
-                                <p class="font-semibold text-gray-900">Médecin</p>
-                                <p class="text-xs text-gray-500 mt-1">Gérer consultations</p>
-                            </div>
-                        </label>
-                        
-                        <label class="role-card cursor-pointer">
-                            <input type="radio" name="role" value="STAFF" class="hidden peer">
-                            <div class="border-2 border-gray-200 rounded-xl p-4 text-center transition-all peer-checked:border-purple-600 peer-checked:bg-purple-50 hover:border-purple-300">
-                                <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 peer-checked:bg-purple-200">
-                                    <i class="fas fa-user-nurse text-2xl text-purple-600"></i>
-                                </div>
-                                <p class="font-semibold text-gray-900">Personnel</p>
-                                <p class="text-xs text-gray-500 mt-1">Accueil/Secrétariat</p>
-                            </div>
-                        </label>
-                        
-                        <label class="role-card cursor-pointer">
-                            <input type="radio" name="role" value="ADMIN" class="hidden peer">
-                            <div class="border-2 border-gray-200 rounded-xl p-4 text-center transition-all peer-checked:border-orange-600 peer-checked:bg-orange-50 hover:border-orange-300">
-                                <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 peer-checked:bg-orange-200">
-                                    <i class="fas fa-user-shield text-2xl text-orange-600"></i>
-                                </div>
-                                <p class="font-semibold text-gray-900">Admin</p>
-                                <p class="text-xs text-gray-500 mt-1">Administration</p>
                             </div>
                         </label>
                     </div>

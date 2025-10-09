@@ -18,7 +18,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@bank.com
       PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
-      - "8080:80"
+      - "5050:80"
     depends_on:
       - db
 
@@ -32,7 +32,7 @@ services:
       - JPDA_ADDRESS=*:8000
       - JPDA_TRANSPORT=dt_socket
     volumes:
-      # Deploy the WAR file instead of mounting directories
+      # Deploy the WAR file. We will handle frontend changes with a separate script.
       - ./target/CliniqueDigitaleJEE.war:/usr/local/tomee/webapps/CliniqueDigitaleJEE.war
     command: catalina.sh jpda run
     depends_on:
