@@ -8,6 +8,9 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Stateless
 public class UserService {
 
@@ -52,4 +55,9 @@ public class UserService {
 
         return BCrypt.checkpw(rawPassword, hashedPassword);
     }
+
+    public List<User> getAllUsers() {
+      return   userRepository.findAll();
+    }
+
 }

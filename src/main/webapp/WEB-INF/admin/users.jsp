@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -68,8 +69,8 @@
                 <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         <c:choose>
-                            <c:when test="${not empty sessionScope.user}">
-                                ${sessionScope.user.firstName.substring(0,1)}${sessionScope.user.lastName.substring(0,1)}
+                            <c:when test="${not empty sessionScope.user && not empty sessionScope.user.name}">
+                                ${fn:substring(sessionScope.user.name, 0, 1)}
                             </c:when>
                             <c:otherwise>AD</c:otherwise>
                         </c:choose>
@@ -78,15 +79,15 @@
                         <p class="font-semibold truncate">
                             <c:choose>
                                 <c:when test="${not empty sessionScope.user}">
-                                    ${sessionScope.user.firstName} ${sessionScope.user.lastName}
+                                    ${sessionScope.user.name}
                                 </c:when>
                                 <c:otherwise>Administrateur</c:otherwise>
                             </c:choose>
                         </p>
                         <p class="text-xs text-primary-200 truncate">
                             <c:choose>
-                                <c:when test="${not empty sessionScope.userEmail}">
-                                    ${sessionScope.userEmail}
+                                <c:when test="${not empty sessionScope.user}">
+                                    ${sessionScope.user.email}
                                 </c:when>
                                 <c:otherwise>admin@clinique.com</c:otherwise>
                             </c:choose>
@@ -269,10 +270,15 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
-                                                ${user.firstName.substring(0,1)}${user.lastName.substring(0,1)}
+                                                <c:choose>
+                                                    <c:when test="${not empty user.name && fn:length(user.name) > 0}">
+                                                        ${fn:substring(user.name, 0, 1)}
+                                                    </c:when>
+                                                    <c:otherwise>U</c:otherwise>
+                                                </c:choose>
                                             </div>
                                             <div>
-                                                <div class="font-semibold text-gray-900">${user.firstName} ${user.lastName}</div>
+                                                <div class="font-semibold text-gray-900">${user.name}</div>
                                                 <div class="text-sm text-gray-500">ID: ${user.id}</div>
                                             </div>
                                         </div>
@@ -305,7 +311,15 @@
                                         <i class="fas fa-envelope text-gray-400 mr-2"></i>${user.email}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        <i class="fas fa-phone text-gray-400 mr-2"></i>${user.phone}
+                                        <i class="fas fa-phone text-gray-400 mr-2"></i>
+                                        <c:choose>
+                                            <c:when test="${user.role == 'PATIENT'}">
+                                                ${user.phone}
+                                            </c:when>
+                                            <c:otherwise>
+                                                N/A
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <c:choose>
@@ -322,7 +336,7 @@
                                         </c:choose>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        ${user.createdAt}
+                                        N/A
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                                         <button onclick="viewUser(${user.id})" class="text-blue-600 hover:text-blue-700 font-semibold" title="Voir">
@@ -386,8 +400,7 @@
                 </div>
                 
                 <!-- Modal Body -->
-                <form id="userForm"  class="p-6">
-                    <input type="hidden" name="OWASP_CSRFTOKEN" value="${sessionScope['OWASP_CSRFTOKEN']}"/>
+                <form id="userForm" action="${pageContext.request.contextPath}/admin/users" method="POST" class="p-6">
                     <input type="hidden" id="userId" name="userId">
 
                     <div class="space-y-4">
@@ -680,16 +693,96 @@
             }
         }
         
+            let form= document.getElementById('userForm');
         // Form submission
-        document.getElementById('userForm').addEventListener('submit', function(e) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
+            showSnackbar("Enregistrement de l'utilisateur...", 'info', true);
+
+            // Create FormData object
             const formData = new FormData(this);
-            
-            // AJAX call to save user
-            console.log('Saving user...');
-            closeUserModal();
+
+            // Debug: Log what we're sending
+            console.log('Form data being sent:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+
+            fetch("${pageContext.request.contextPath}/admin/users", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+
+                showSnackbar(data.message, 'success');
+                console.log('Success:', data);
+                closeUserModal();
+            })
+            .catch((error) => {
+                showSnackbar("Erreur lors de l'enregistrement de l'utilisateur.", 'error');
+                console.error('Error:', error);
+            });
         });
-        
+
+        // Snackbar with loading animation
+        function showSnackbar(message, type = 'success', loading = false) {
+            const existing = document.getElementById('snackbar');
+            if (existing) existing.remove();
+
+            const snackbar = document.createElement('div');
+            snackbar.id = 'snackbar';
+
+            // Use string concatenation instead of template literals to avoid JSP EL parsing issues
+            let bgColor = 'bg-gray-800';
+            if (type === 'success') bgColor = 'bg-green-600';
+            else if (type === 'error') bgColor = 'bg-red-600';
+
+            snackbar.className = 'fixed bottom-6 right-6 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-semibold flex items-center space-x-3 transition-all ' + bgColor;
+
+            if (loading) {
+                snackbar.innerHTML = '<span class="loader mr-3"></span><span>' + message + '</span>';
+            } else {
+                let iconClass = 'fa-info-circle';
+                if (type === 'success') iconClass = 'fa-check-circle';
+                else if (type === 'error') iconClass = 'fa-times-circle';
+
+                snackbar.innerHTML = '<i class="fas ' + iconClass + ' text-xl"></i><span>' + message + '</span>';
+            }
+
+            document.body.appendChild(snackbar);
+
+            if (!loading) {
+                setTimeout(() => {
+                    snackbar.classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => snackbar.remove(), 500);
+                }, 3000);
+            }
+        }
+
+        // Loader CSS
+        const style = document.createElement('style');
+        style.innerHTML = `
+.loader {
+  border: 3px solid #fff3;
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+`;
+        document.head.appendChild(style);
+
         // Search and filters
         document.getElementById('search').addEventListener('input', function() {
             // Implement search logic

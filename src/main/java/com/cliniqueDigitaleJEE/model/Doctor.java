@@ -19,11 +19,10 @@ public class Doctor extends User{
 
     public Doctor() {}
 
-    public Doctor(String name, String email, String password, Role role, String matricule, String title, Specialty specialty) {
-        super(name, email, password, role);
+    public Doctor(String name, String email, String password, String matricule, String title) {
+        super(name, email, password, Role.DOCTOR);
         this.matricule = matricule;
         this.title = title;
-        this.specialty = specialty;
     }
     public List<Availability> getAvailabilities() {
         return availabilities;
