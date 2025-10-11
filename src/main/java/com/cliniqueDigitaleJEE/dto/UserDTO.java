@@ -66,6 +66,21 @@ public class UserDTO {
         }
     }
 
+    // Helper methods to get first and last name from full name
+    public String getFirstName() {
+        if (name != null && name.contains(" ")) {
+            return name.substring(0, name.indexOf(" "));
+        }
+        return name != null ? name : "";
+    }
+
+    public String getLastName() {
+        if (name != null && name.contains(" ")) {
+            return name.substring(name.indexOf(" ") + 1);
+        }
+        return "";
+    }
+
     public UUID getId() {
         return id;
     }

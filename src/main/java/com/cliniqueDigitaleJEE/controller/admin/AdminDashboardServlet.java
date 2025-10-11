@@ -28,7 +28,7 @@ public class AdminDashboardServlet extends HttpServlet {
             return;
         }
         
-        String userRole = (String) session.getAttribute("userRole");
+        String userRole = String.valueOf(session.getAttribute("userRole"));
         if (!"ADMIN".equals(userRole)) {
             resp.sendRedirect(req.getContextPath() + "/403");
             return;

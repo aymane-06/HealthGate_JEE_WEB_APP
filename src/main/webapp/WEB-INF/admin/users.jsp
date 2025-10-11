@@ -386,9 +386,10 @@
                 </div>
                 
                 <!-- Modal Body -->
-                <form id="userForm" class="p-6">
+                <form id="userForm"  class="p-6">
+                    <input type="hidden" name="OWASP_CSRFTOKEN" value="${sessionScope['OWASP_CSRFTOKEN']}"/>
                     <input type="hidden" id="userId" name="userId">
-                    
+
                     <div class="space-y-4">
                         <!-- Role Selection -->
                         <div>
@@ -481,6 +482,144 @@
                                 </select>
                             </div>
                         </div>
+
+                        <!-- PATIENT SPECIFIC FIELDS -->
+                        <div id="patientFields" class="hidden space-y-4 mt-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                            <h4 class="font-bold text-blue-900 flex items-center">
+                                <i class="fas fa-user-injured mr-2"></i>Informations Patient
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-id-card text-blue-600 mr-2"></i>CIN <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="cin" id="patientCin"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-tint text-blue-600 mr-2"></i>Groupe Sanguin
+                                    </label>
+                                    <select name="bloodType" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                        <option value="">Sélectionner</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-calendar text-blue-600 mr-2"></i>Date de Naissance
+                                    </label>
+                                    <input type="date" name="birthDate"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-venus-mars text-blue-600 mr-2"></i>Sexe
+                                    </label>
+                                    <select name="gender" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                        <option value="">Sélectionner</option>
+                                        <option value="MALE">Homme</option>
+                                        <option value="FEMALE">Femme</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>Adresse
+                                </label>
+                                <textarea name="address" rows="2"
+                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- DOCTOR SPECIFIC FIELDS -->
+                        <div id="doctorFields" class="hidden space-y-4 mt-6 p-4 bg-secondary-50 rounded-lg border-2 border-secondary-200">
+                            <h4 class="font-bold text-secondary-900 flex items-center">
+                                <i class="fas fa-user-md mr-2"></i>Informations Médecin
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-id-badge text-secondary-600 mr-2"></i>Matricule <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="matricule" id="doctorMatricule"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition-all"
+                                           placeholder="DR-2025-XXX">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-user-graduate text-secondary-600 mr-2"></i>Titre
+                                    </label>
+                                    <input type="text" name="title"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition-all"
+                                           placeholder="Dr., Pr., etc.">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-stethoscope text-secondary-600 mr-2"></i>Spécialité <span class="text-red-500">*</span>
+                                </label>
+                                <select name="specialtyId" id="doctorSpecialty" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition-all">
+                                    <option value="">Sélectionner une spécialité</option>
+                                    <option value="1">Cardiologie</option>
+                                    <option value="2">Neurologie</option>
+                                    <option value="3">Pédiatrie</option>
+                                    <option value="4">Dermatologie</option>
+                                    <option value="5">Orthopédie</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- STAFF SPECIFIC FIELDS -->
+                        <div id="staffFields" class="hidden space-y-4 mt-6 p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
+                            <h4 class="font-bold text-purple-900 flex items-center">
+                                <i class="fas fa-user-tie mr-2"></i>Informations Personnel
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-briefcase text-purple-600 mr-2"></i>Poste <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="position" id="staffPosition"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                           placeholder="Secrétaire, Infirmier, etc.">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-id-card-alt text-purple-600 mr-2"></i>ID Employé <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="employeeId" id="staffEmployeeId"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                           placeholder="EMP-2025-XXX">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ADMIN FIELDS (minimal) -->
+                        <div id="adminFields" class="hidden mt-6 p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
+                            <h4 class="font-bold text-orange-900 flex items-center">
+                                <i class="fas fa-user-shield mr-2"></i>Informations Administrateur
+                            </h4>
+                            <p class="text-sm text-orange-700 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                L'administrateur aura un accès complet au système
+                            </p>
+                        </div>
                     </div>
                     
                     <!-- Modal Footer -->
@@ -565,6 +704,30 @@
         document.getElementById('statusFilter').addEventListener('change', function() {
             // Implement status filter logic
             console.log('Filter by status:', this.value);
+        });
+
+        // Show/hide specific fields based on role selection
+        document.querySelectorAll('input[name="role"]').forEach(function(el) {
+            el.addEventListener('change', function() {
+                const role = this.value;
+
+                // Hide all specific fields
+                document.getElementById('patientFields').classList.add('hidden');
+                document.getElementById('doctorFields').classList.add('hidden');
+                document.getElementById('staffFields').classList.add('hidden');
+                document.getElementById('adminFields').classList.add('hidden');
+
+                // Show specific fields based on selected role
+                if (role === 'PATIENT') {
+                    document.getElementById('patientFields').classList.remove('hidden');
+                } else if (role === 'DOCTOR') {
+                    document.getElementById('doctorFields').classList.remove('hidden');
+                } else if (role === 'STAFF') {
+                    document.getElementById('staffFields').classList.remove('hidden');
+                } else if (role === 'ADMIN') {
+                    document.getElementById('adminFields').classList.remove('hidden');
+                }
+            });
         });
     </script>
 </body>

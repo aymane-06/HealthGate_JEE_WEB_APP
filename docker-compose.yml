@@ -22,21 +22,27 @@ services:
     depends_on:
       - db
 
-  tomcat:
+  tomee:
     image: tomee:10.0.0-M3-webprofile
-    container_name: clinique_tomcat
+    container_name: clinique_tomee
     ports:
       - "8081:8080"
       - "8000:8000"
     environment:
       - JPDA_ADDRESS=*:8000
       - JPDA_TRANSPORT=dt_socket
-    volumes:
-      # Deploy the WAR file. We will handle frontend changes with a separate script.
-      - ./target/CliniqueDigitaleJEE.war:/usr/local/tomee/webapps/CliniqueDigitaleJEE.war
     command: catalina.sh jpda run
     depends_on:
       - db
+    volumes:
+      # Mount the webapp folder (for JSP, HTML, etc.)
+      - ./src/main/webapp:/usr/local/tomee/webapps/CliniqueDigitaleJEE
+
+      # Mount compiled Java classes (for servlets, beans, etc.)
+      - ./target/classes:/usr/local/tomee/webapps/CliniqueDigitaleJEE/WEB-INF/classes
+
+      # Optional: include lib if you have project-specific jars
+      - ./target/CliniqueDigitaleJEE/WEB-INF/lib:/usr/local/tomee/webapps/CliniqueDigitaleJEE/WEB-INF/lib
 
 volumes:
   db_data:

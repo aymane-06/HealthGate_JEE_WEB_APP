@@ -25,8 +25,8 @@ public class Patient extends User{
 
     public Patient() {}
 
-    public Patient(String name, String email, String password, Role role, String CIN, String address, String phone, LocalDate birthDate, Gender gender, String bloodType) {
-        super(name, email, password, role);
+    public Patient(String name, String email, String password, String CIN, String address, String phone, LocalDate birthDate, Gender gender, String bloodType) {
+        super(name, email, password, Role.PATIENT);
         this.CIN = CIN;
         this.address = address;
         this.phone = phone;

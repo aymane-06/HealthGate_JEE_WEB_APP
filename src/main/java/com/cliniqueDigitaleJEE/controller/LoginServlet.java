@@ -36,7 +36,7 @@ public class LoginServlet extends HttpServlet {
         
         // If already logged in, redirect to appropriate dashboard
         if (session != null && session.getAttribute("user") != null) {
-            String role = (String) session.getAttribute("userRole");
+            String role = String.valueOf(session.getAttribute("userRole"));
             resp.sendRedirect(req.getContextPath() + "/" + role.toLowerCase() + "/dashboard");
             return;
         }
@@ -65,14 +65,14 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("userRole", user.getRole());
                 
                 // Redirect based on role
-                String role = (String) session.getAttribute("userRole");
+                String role = String.valueOf(session.getAttribute("userRole"));
                 resp.sendRedirect(req.getContextPath() + "/" + role.toLowerCase() + "/dashboard");
             } else {
                 req.setAttribute("error", "Email ou mot de passe incorrect");
                 req.getRequestDispatcher("/WEB-INF/auth/login.jsp").forward(req, resp);
             }
         } catch (Exception e) {
-            req.setAttribute("error", "Une erreur est survenue. Veuillez réessayer.");
+            req.setAttribute("error", "Une erreur est survenue. Veuillez réessayer."+e.getMessage());
             req.getRequestDispatcher("/WEB-INF/auth/login.jsp").forward(req, resp);
         }
     }

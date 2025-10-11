@@ -15,7 +15,7 @@ public class UserService {
     private UserRepository userRepository;
 
     @Transactional
-    public void registerUser(User user) {
+    public boolean registerUser(User user) {
         // Business logic here
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new IllegalArgumentException("Email already exists");
@@ -26,6 +26,7 @@ public class UserService {
 
 
         userRepository.save(user);
+        return true;
     }
 
     public User authenticate(String email, String password) {

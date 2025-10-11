@@ -1,18 +1,28 @@
 package com.cliniqueDigitaleJEE.controller;
 
+import com.cliniqueDigitaleJEE.model.ENUMS.Gender;
+import com.cliniqueDigitaleJEE.model.Patient;
+import com.cliniqueDigitaleJEE.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
+
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 /**
  * RegisterServlet - Handles user registration
  */
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
+
+    @Inject
+     private UserService userService;
+
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -26,7 +36,15 @@ public class RegisterServlet extends HttpServlet {
         String email = req.getParameter("email");
         String password = req.getParameter("password");
         String confirmPassword = req.getParameter("confirmPassword");
-        String role = req.getParameter("role");
+        String cin = req.getParameter("cin");
+        String phone = req.getParameter("phone");
+        String address = req.getParameter("address");
+        String birthDateStr = req.getParameter("birthDate");
+        String genderStr = req.getParameter("gender");
+        String bloodType = req.getParameter("bloodType");
+
+        String fullName = firstName + " " + lastName;
+
         
         // Validation
         if (!password.equals(confirmPassword)) {
@@ -36,8 +54,21 @@ public class RegisterServlet extends HttpServlet {
         }
         
         try {
-            // TODO: Implement actual registration logic with your service layer
-            boolean isRegistered = registerUser(firstName, lastName, email, password, role);
+            // Parse birthDate safely
+            LocalDate birthDate = null;
+            if (birthDateStr != null && !birthDateStr.isEmpty()) {
+                birthDate = LocalDate.parse(birthDateStr);
+            }
+
+            // Parse gender safely
+            Gender gender = null;
+            if (genderStr != null && !genderStr.isEmpty()) {
+                gender = Gender.valueOf(genderStr);
+            }
+
+            Patient patient = new Patient(fullName, email, password, cin, address, phone, birthDate, gender, bloodType);
+
+            boolean isRegistered = userService.registerUser(patient);
             
             if (isRegistered) {
                 req.setAttribute("success", "Inscription réussie ! Vous pouvez maintenant vous connecter.");
@@ -47,14 +78,9 @@ public class RegisterServlet extends HttpServlet {
                 req.getRequestDispatcher("/WEB-INF/auth/register.jsp").forward(req, resp);
             }
         } catch (Exception e) {
-            req.setAttribute("error", "Une erreur est survenue lors de l'inscription");
+            req.setAttribute("error", "Une erreur est survenue lors de l'inscription: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/auth/register.jsp").forward(req, resp);
         }
     }
-    
-    // Mock method - replace with actual service layer call
-    private boolean registerUser(String firstName, String lastName, String email, String password, String role) {
-        // TODO: Call your user service to register the user
-        return true; // Mock success
-    }
+
 }

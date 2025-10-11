@@ -5,376 +5,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prendre rendez-vous - Clinique Digitale</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <title>Prendre Rendez-vous - Clinique Digitale</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#e6f2ff', 100: '#b3d9ff', 200: '#80bfff',
+                            300: '#4da6ff', 400: '#1a8cff', 500: '#0073e6',
+                            600: '#0066CC', 700: '#0052a3', 800: '#003d7a',
+                            900: '#002952',
+                        },
+                        secondary: {
+                            50: '#e6fff9', 100: '#b3ffe9', 200: '#80ffd9',
+                            300: '#4dffc9', 400: '#1affb9', 500: '#00e6a0',
+                            600: '#00D9A5', 700: '#00a67a', 800: '#007352',
+                            900: '#004029',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .doctor-card { transition: all 0.3s; }
+        .doctor-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    </style>
 </head>
-<body>
-    <jsp:include page="../components/sidebar.jsp" />
-    
-    <main class="main-content">
-        <h1 class="mb-4">Prendre un rendez-vous</h1>
-        
-        <div id="alert-container"></div>
-        
-        <div class="row">
-            <div class="col-8">
-                <!-- Step 1: Select Specialty/Doctor -->
-                <div class="card mb-3" id="step1">
-                    <div class="card-header">
-                        <h5>Étape 1: Choisir un docteur</h5>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gradient-to-b from-primary-900 to-primary-800 text-white flex-shrink-0 hidden md:flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-primary-700">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-hospital text-3xl text-secondary-400"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">Clinique</h1>
+                        <p class="text-xs text-primary-200">Espace Patient</p>
                     </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label">Filtrer par spécialité</label>
-                                <select class="form-control form-select" id="specialtyFilter" 
-                                        onchange="filterDoctors()">
-                                    <option value="">Toutes les spécialités</option>
-                                    <c:forEach items="${specialties}" var="specialty">
-                                        <option value="${specialty.id}">${specialty.name}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Rechercher</label>
-                                <input type="text" class="form-control" id="doctorSearch" 
-                                       placeholder="Nom du docteur..." onkeyup="filterDoctors()">
+                </div>
+            </div>
+
+            <div class="p-6 border-b border-primary-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        ${sessionScope.user.firstName.substring(0,1)}${sessionScope.user.lastName.substring(0,1)}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold truncate">${sessionScope.user.firstName} ${sessionScope.user.lastName}</p>
+                        <p class="text-xs text-primary-200 truncate">Patient</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 p-4 overflow-y-auto">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="${pageContext.request.contextPath}/patient/dashboard" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                            <i class="fas fa-chart-line w-5"></i>
+                            <span class="font-medium">Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/patient/book-appointment" class="flex items-center space-x-3 p-3 rounded-lg bg-primary-700/50 text-white">
+                            <i class="fas fa-calendar-plus w-5"></i>
+                            <span class="font-medium">Prendre RDV</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/patient/appointments" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            <span class="font-medium">Mes Rendez-vous</span>
+                            <span class="ml-auto bg-secondary-500 text-white text-xs px-2 py-1 rounded-full">2</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/patient/history" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                            <i class="fas fa-file-medical w-5"></i>
+                            <span class="font-medium">Mon Historique</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/patient/prescriptions" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                            <i class="fas fa-prescription w-5"></i>
+                            <span class="font-medium">Mes Ordonnances</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="mt-6 pt-6 border-t border-primary-700">
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/profile" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
+                                <i class="fas fa-user-circle w-5"></i>
+                                <span class="font-medium">Mon Profil</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/logout" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-red-600/80 transition-colors text-primary-100 hover:text-white">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span class="font-medium">Déconnexion</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="menu-toggle" class="md:hidden text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-bars text-2xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Prendre un Rendez-vous 📅</h2>
+                            <p class="text-sm text-gray-500">Sélectionnez un docteur pour planifier votre consultation</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+
+                <c:if test="${not empty error}">
+                    <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle text-red-500 mt-0.5 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-bold text-red-800">Erreur</p>
+                                <p class="text-sm text-red-700">${error}</p>
                             </div>
                         </div>
-                        
-                        <div class="row" id="doctorsList">
-                            <c:forEach items="${doctors}" var="doctor">
-                                <div class="col-6 mb-3 doctor-card" 
-                                     data-specialty="${doctor.specialtyId}" 
-                                     data-name="${doctor.firstName} ${doctor.lastName}">
-                                    <div class="card" style="cursor: pointer;" 
-                                         onclick="selectDoctor('${doctor.id}', '${doctor.firstName} ${doctor.lastName}')">
-                                        <div class="card-body">
-                                            <div class="d-flex align-center">
-                                                <div style="width: 60px; height: 60px; border-radius: 50%; 
-                                                            background: var(--primary-color); color: white; 
-                                                            display: flex; align-items: center; 
-                                                            justify-content: center; font-size: 1.5rem; 
-                                                            margin-right: 1rem;">
-                                                    ${doctor.title}
+                    </div>
+                </c:if>
+
+                <!-- Search and Filter Section -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-filter text-primary-600 mr-2"></i>Filtrer par spécialité
+                            </label>
+                            <select class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all outline-none"
+                                    id="specialtyFilter" onchange="filterDoctors()">
+                                <option value="">Toutes les spécialités</option>
+                                <c:forEach items="${specialties}" var="specialty">
+                                    <option value="${specialty.id}">${specialty.name}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-search text-primary-600 mr-2"></i>Rechercher un docteur
+                            </label>
+                            <input type="text"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all outline-none"
+                                   id="doctorSearch"
+                                   placeholder="Nom du docteur..."
+                                   onkeyup="filterDoctors()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctors List -->
+                <div id="doctorsContainer">
+                    <c:choose>
+                        <c:when test="${empty doctors}">
+                            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200 rounded-2xl p-8 text-center">
+                                <div class="bg-yellow-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-info-circle text-yellow-600 text-4xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-yellow-900 mb-2">Aucun docteur disponible</h3>
+                                <p class="text-yellow-700">Veuillez réessayer plus tard ou contacter l'administration</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="doctorsList">
+                                <c:forEach items="${doctors}" var="doctor">
+                                    <div class="doctor-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+                                         data-specialty="${doctor.specialty != null ? doctor.specialty.id : ''}"
+                                         data-name="${doctor.name}">
+                                        <div class="p-6">
+                                            <div class="flex items-start mb-4">
+                                                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg mr-4 flex-shrink-0">
+                                                    ${doctor.name.substring(0,1).toUpperCase()}
                                                 </div>
-                                                <div>
-                                                    <h6 class="mb-1">${doctor.title} ${doctor.firstName} ${doctor.lastName}</h6>
-                                                    <p class="text-muted mb-1">
-                                                        <strong>${doctor.specialtyName}</strong>
-                                                    </p>
-                                                    <p class="text-muted mb-0">
-                                                        ${doctor.departmentName}
-                                                    </p>
+                                                <div class="flex-1 min-w-0">
+                                                    <h3 class="text-lg font-bold text-gray-900 mb-1 truncate">
+                                                        <c:if test="${doctor.title != null}">${doctor.title} </c:if>
+                                                        ${doctor.name}
+                                                    </h3>
+                                                    <c:choose>
+                                                        <c:when test="${doctor.specialty != null}">
+                                                            <div class="inline-flex items-center px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm font-semibold">
+                                                                <i class="fas fa-stethoscope mr-1"></i>
+                                                                ${doctor.specialty.name}
+                                                            </div>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-semibold">
+                                                                <i class="fas fa-user-md mr-1"></i>
+                                                                Généraliste
+                                                            </div>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </div>
+                                            </div>
+
+                                            <div class="space-y-2 mb-4 text-sm text-gray-600">
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-graduation-cap w-5 text-gray-400"></i>
+                                                    <span class="ml-2">15 ans d'expérience</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
+                                                    <span class="ml-2">Cabinet principal</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-star w-5 text-yellow-400"></i>
+                                                    <span class="ml-2 font-semibold">4.8/5 (124 avis)</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="border-t pt-4">
+                                                <a href="${pageContext.request.contextPath}/patient/appointments/new?doctorId=${doctor.id}"
+                                                   class="block w-full bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white text-center py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg transform hover:scale-105">
+                                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                                    Prendre Rendez-vous
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </c:forEach>
-                        </div>
-                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
-                
-                <!-- Step 2: Select Date -->
-                <div class="card mb-3" id="step2" style="display: none;">
-                    <div class="card-header d-flex justify-between align-center">
-                        <h5>Étape 2: Choisir une date</h5>
-                        <button class="btn btn-sm btn-secondary" onclick="goToStep(1)">
-                            ← Retour
-                        </button>
+
+                <!-- Empty state for filtered results -->
+                <div id="noResultsMessage" class="hidden bg-white rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center">
+                    <div class="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-gray-400 text-4xl"></i>
                     </div>
-                    <div class="card-body">
-                        <div class="calendar">
-                            <div class="calendar-header">
-                                <button class="btn btn-sm btn-secondary" onclick="previousMonth()">‹</button>
-                                <h4 id="currentMonth">Octobre 2025</h4>
-                                <button class="btn btn-sm btn-secondary" onclick="nextMonth()">›</button>
-                            </div>
-                            <div class="calendar-weekdays mb-2" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">
-                                <div class="text-center font-weight-bold">Lun</div>
-                                <div class="text-center font-weight-bold">Mar</div>
-                                <div class="text-center font-weight-bold">Mer</div>
-                                <div class="text-center font-weight-bold">Jeu</div>
-                                <div class="text-center font-weight-bold">Ven</div>
-                                <div class="text-center font-weight-bold">Sam</div>
-                                <div class="text-center font-weight-bold">Dim</div>
-                            </div>
-                            <div class="calendar-grid" id="calendarGrid">
-                                <!-- Calendar rendered by JS -->
-                            </div>
-                        </div>
-                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">Aucun docteur trouvé</h3>
+                    <p class="text-gray-500">Essayez de modifier vos critères de recherche</p>
                 </div>
-                
-                <!-- Step 3: Select Time -->
-                <div class="card mb-3" id="step3" style="display: none;">
-                    <div class="card-header d-flex justify-between align-center">
-                        <h5>Étape 3: Choisir un créneau horaire</h5>
-                        <button class="btn btn-sm btn-secondary" onclick="goToStep(2)">
-                            ← Retour
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="timeSlotsContainer">
-                            <div class="text-center p-4 text-muted">
-                                Sélectionnez une date pour voir les créneaux disponibles
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Step 4: Confirm -->
-                <div class="card" id="step4" style="display: none;">
-                    <div class="card-header d-flex justify-between align-center">
-                        <h5>Étape 4: Confirmer le rendez-vous</h5>
-                        <button class="btn btn-sm btn-secondary" onclick="goToStep(3)">
-                            ← Retour
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-6">
-                                <h6>Détails du rendez-vous</h6>
-                                <p><strong>Docteur:</strong> <span id="confirmDoctor"></span></p>
-                                <p><strong>Date:</strong> <span id="confirmDate"></span></p>
-                                <p><strong>Heure:</strong> <span id="confirmTime"></span></p>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label required">Type de consultation</label>
-                                    <select class="form-control form-select" id="appointmentType" required>
-                                        <option value="">Sélectionner</option>
-                                        <option value="CONSULTATION">Consultation</option>
-                                        <option value="FOLLOW_UP">Suivi</option>
-                                        <option value="EMERGENCY">Urgence</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Notes (optionnel)</label>
-                                    <textarea class="form-control" id="appointmentNotes" rows="3" 
-                                              placeholder="Raison de la consultation..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary btn-lg btn-block mt-3" onclick="confirmAppointment()">
-                            Confirmer le rendez-vous
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Sidebar Summary -->
-            <div class="col-4">
-                <div class="card" style="position: sticky; top: 20px;">
-                    <div class="card-header">
-                        <h5>Récapitulatif</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <strong>Docteur:</strong>
-                            <p id="summaryDoctor" class="text-muted">Non sélectionné</p>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Date:</strong>
-                            <p id="summaryDate" class="text-muted">Non sélectionnée</p>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Heure:</strong>
-                            <p id="summaryTime" class="text-muted">Non sélectionnée</p>
-                        </div>
-                        
-                        <div class="alert alert-info mt-3">
-                            <small>
-                                <strong>ℹ️ À noter:</strong><br>
-                                • Réservation minimum 2h à l'avance<br>
-                                • Annulation possible 12h avant<br>
-                                • Vous recevrez une confirmation par email
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+            </main>
         </div>
-    </main>
-    
-    <script src="${pageContext.request.contextPath}/js/main.js"></script>
+    </div>
+
     <script>
-        let currentStep = 1;
-        let selectedDoctor = null;
-        let selectedDoctorName = '';
-        let selectedDate = null;
-        let selectedTime = null;
-        let currentDate = new Date();
-        
         function filterDoctors() {
             const specialtyId = document.getElementById('specialtyFilter').value;
             const search = document.getElementById('doctorSearch').value.toLowerCase();
             const doctorCards = document.querySelectorAll('.doctor-card');
-            
+            let visibleCount = 0;
+
             doctorCards.forEach(card => {
                 const matchesSpecialty = !specialtyId || card.dataset.specialty === specialtyId;
                 const matchesSearch = !search || card.dataset.name.toLowerCase().includes(search);
-                card.style.display = matchesSpecialty && matchesSearch ? 'block' : 'none';
+                const isVisible = matchesSpecialty && matchesSearch;
+
+                card.style.display = isVisible ? 'block' : 'none';
+                if (isVisible) visibleCount++;
             });
-        }
-        
-        function selectDoctor(doctorId, doctorName) {
-            selectedDoctor = doctorId;
-            selectedDoctorName = doctorName;
-            document.getElementById('summaryDoctor').textContent = doctorName;
-            document.getElementById('confirmDoctor').textContent = doctorName;
-            goToStep(2);
-        }
-        
-        function goToStep(step) {
-            // Hide all steps
-            for (let i = 1; i <= 4; i++) {
-                const stepEl = document.getElementById(`step${i}`);
-                if (stepEl) stepEl.style.display = 'none';
+
+            // Show/hide no results message
+            const noResults = document.getElementById('noResultsMessage');
+            const doctorsList = document.getElementById('doctorsList');
+
+            if (visibleCount === 0 && doctorCards.length > 0) {
+                noResults.classList.remove('hidden');
+                if (doctorsList) doctorsList.style.display = 'none';
+            } else {
+                noResults.classList.add('hidden');
+                if (doctorsList) doctorsList.style.display = 'grid';
             }
-            
-            // Show current step
-            const currentStepEl = document.getElementById(`step${step}`);
-            if (currentStepEl) currentStepEl.style.display = 'block';
-            
-            currentStep = step;
-            
-            // Render calendar if step 2
-            if (step === 2) {
-                renderCalendar();
-            }
-        }
-        
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            
-            document.getElementById('currentMonth').textContent = 
-                currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-            
-            grid.innerHTML = '';
-            
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
-            
-            // Empty cells
-            for (let i = 0; i < (firstDay === 0 ? 6 : firstDay - 1); i++) {
-                const emptyCell = document.createElement('div');
-                emptyCell.className = 'calendar-day disabled';
-                grid.appendChild(emptyCell);
-            }
-            
-            // Days
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const isPast = date < today;
-                
-                const dayCell = document.createElement('div');
-                dayCell.className = 'calendar-day' + (isPast ? ' disabled' : '');
-                dayCell.textContent = day;
-                
-                if (!isPast) {
-                    dayCell.onclick = () => selectDate(year, month, day);
-                }
-                
-                grid.appendChild(dayCell);
-            }
-        }
-        
-        function previousMonth() {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        }
-        
-        function nextMonth() {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        }
-        
-        function selectDate(year, month, day) {
-            selectedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const dateObj = new Date(year, month, day);
-            const dateStr = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
-            document.getElementById('summaryDate').textContent = dateStr;
-            document.getElementById('confirmDate').textContent = dateStr;
-            
-            loadTimeSlots();
-            goToStep(3);
-        }
-        
-        function loadTimeSlots() {
-            const container = document.getElementById('timeSlotsContainer');
-            container.innerHTML = '<div class="text-center p-4">Chargement...</div>';
-            
-            CliniqueApp.fetchData(`${pageContext.request.contextPath}/api/appointments/available-slots?doctorId=${selectedDoctor}&date=${selectedDate}`)
-                .then(slots => {
-                    if (slots.length === 0) {
-                        container.innerHTML = '<div class="alert alert-warning">Aucun créneau disponible pour cette date</div>';
-                        return;
-                    }
-                    
-                    container.innerHTML = '<div class="time-slots"></div>';
-                    const slotsGrid = container.querySelector('.time-slots');
-                    
-                    slots.forEach(slot => {
-                        const slotEl = document.createElement('div');
-                        slotEl.className = 'time-slot' + (!slot.available ? ' unavailable' : '');
-                        slotEl.textContent = slot.time;
-                        
-                        if (slot.available) {
-                            slotEl.onclick = () => selectTime(slot.time);
-                        }
-                        
-                        slotsGrid.appendChild(slotEl);
-                    });
-                })
-                .catch(error => {
-                    container.innerHTML = '<div class="alert alert-danger">Erreur de chargement</div>';
-                });
-        }
-        
-        function selectTime(time) {
-            selectedTime = time;
-            document.getElementById('summaryTime').textContent = time;
-            document.getElementById('confirmTime').textContent = time;
-            goToStep(4);
-        }
-        
-        function confirmAppointment() {
-            const type = document.getElementById('appointmentType').value;
-            const notes = document.getElementById('appointmentNotes').value;
-            
-            if (!type) {
-                CliniqueApp.showAlert('Veuillez sélectionner un type de consultation', 'warning');
-                return;
-            }
-            
-            const data = {
-                doctorId: selectedDoctor,
-                date: selectedDate,
-                time: selectedTime,
-                type: type,
-                notes: notes
-            };
-            
-            CliniqueApp.fetchData('${pageContext.request.contextPath}/api/appointments', {
-                method: 'POST',
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                CliniqueApp.showAlert('Rendez-vous confirmé avec succès!', 'success');
-                setTimeout(() => {
-                    window.location.href = '${pageContext.request.contextPath}/patient/appointments.jsp';
-                }, 2000);
-            })
-            .catch(error => {
-                CliniqueApp.showAlert('Erreur lors de la réservation', 'danger');
-            });
         }
     </script>
 </body>
