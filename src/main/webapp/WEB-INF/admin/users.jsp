@@ -46,6 +46,20 @@
         .modal-backdrop {
             backdrop-filter: blur(8px);
         }
+        
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -216,10 +230,10 @@
                 
                 <!-- Filters & Search -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div class="md:col-span-2">
                             <div class="relative">
-                                <input type="text" id="search" placeholder="Rechercher par nom, email..." 
+                                <input type="text" id="searchInput" placeholder="Rechercher par nom, email, rôle..." 
                                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
                                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             </div>
@@ -240,141 +254,86 @@
                                 <option value="inactive">Inactif</option>
                             </select>
                         </div>
+                        <div>
+                            <select id="pageSizeSelector" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                                <option value="10">10 par page</option>
+                                <option value="25">25 par page</option>
+                                <option value="50">50 par page</option>
+                                <option value="100">100 par page</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Users Table -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div id="tableContainer" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
+                    <!-- Loading Overlay -->
+                    <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm z-50 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600 mb-4"></div>
+                            <p class="text-gray-600 font-semibold text-lg">Chargement des utilisateurs...</p>
+                        </div>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                                        <input type="checkbox" class="w-5 h-5 text-primary-600 rounded">
+                                        <input type="checkbox" id="selectAll" class="w-5 h-5 text-primary-600 rounded">
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Utilisateur</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Rôle</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Email</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors" onclick="userManager.sortBy('name')">
+                                        <div class="flex items-center space-x-2">
+                                            <span>Utilisateur</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors" onclick="userManager.sortBy('role')">
+                                        <div class="flex items-center space-x-2">
+                                            <span>Rôle</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors" onclick="userManager.sortBy('email')">
+                                        <div class="flex items-center space-x-2">
+                                            <span>Email</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Téléphone</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Statut</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Créé le</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors" onclick="userManager.sortBy('status')">
+                                        <div class="flex items-center space-x-2">
+                                            <span>Statut</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <c:forEach items="${users}" var="user">
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4">
-                                        <input type="checkbox" class="w-5 h-5 text-primary-600 rounded">
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
-                                                <c:choose>
-                                                    <c:when test="${not empty user.name && fn:length(user.name) > 0}">
-                                                        ${fn:substring(user.name, 0, 1)}
-                                                    </c:when>
-                                                    <c:otherwise>U</c:otherwise>
-                                                </c:choose>
-                                            </div>
-                                            <div>
-                                                <div class="font-semibold text-gray-900">${user.name}</div>
-                                                <div class="text-sm text-gray-500">ID: ${user.id}</div>
-                                            </div>
+                            <tbody id="usersTableBody" class="divide-y divide-gray-100">
+                                <!-- Skeleton Loading (shown initially) -->
+                                <tr class="skeleton-row">
+                                    <td colspan="7" class="px-6 py-4">
+                                        <div class="space-y-3">
+                                            <div class="h-4 bg-gray-200 rounded animate-pulse"></div>
+                                            <div class="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                                            <div class="h-4 bg-gray-200 rounded animate-pulse w-4/6"></div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <c:choose>
-                                            <c:when test="${user.role == 'ADMIN'}">
-                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-orange-100 text-orange-700">
-                                                    <i class="fas fa-user-shield mr-1"></i>Admin
-                                                </span>
-                                            </c:when>
-                                            <c:when test="${user.role == 'DOCTOR'}">
-                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-secondary-100 text-secondary-700">
-                                                    <i class="fas fa-user-md mr-1"></i>Médecin
-                                                </span>
-                                            </c:when>
-                                            <c:when test="${user.role == 'PATIENT'}">
-                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700">
-                                                    <i class="fas fa-user-injured mr-1"></i>Patient
-                                                </span>
-                                            </c:when>
-                                            <c:when test="${user.role == 'STAFF'}">
-                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-purple-100 text-purple-700">
-                                                    <i class="fas fa-user-tie mr-1"></i>Personnel
-                                                </span>
-                                            </c:when>
-                                        </c:choose>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        <i class="fas fa-envelope text-gray-400 mr-2"></i>${user.email}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        <i class="fas fa-phone text-gray-400 mr-2"></i>
-                                        <c:choose>
-                                            <c:when test="${user.role == 'PATIENT'}">
-                                                ${user.phone}
-                                            </c:when>
-                                            <c:otherwise>
-                                                N/A
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <c:choose>
-                                            <c:when test="${user.active}">
-                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700">
-                                                    <i class="fas fa-check-circle mr-1"></i>Actif
-                                                </span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700">
-                                                    <i class="fas fa-times-circle mr-1"></i>Inactif
-                                                </span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        N/A
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                                        <button onclick="viewUser(${user.id})" class="text-blue-600 hover:text-blue-700 font-semibold" title="Voir">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button onclick="editUser(${user.id})" class="text-primary-600 hover:text-primary-700 font-semibold" title="Modifier">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button onclick="toggleUserStatus(${user.id})" class="text-orange-600 hover:text-orange-700 font-semibold" title="Activer/Désactiver">
-                                            <i class="fas fa-toggle-on"></i>
-                                        </button>
-                                        <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-700 font-semibold" title="Supprimer">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
                                 </tr>
-                                </c:forEach>
                             </tbody>
                         </table>
                     </div>
                     
                     <!-- Pagination -->
-                    <div class="flex items-center justify-between p-6 border-t border-gray-100">
-                        <div class="text-sm text-gray-600">
-                            Affichage de <span class="font-semibold">1</span> à <span class="font-semibold">20</span> sur <span class="font-semibold">1247</span> utilisateurs
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50" disabled>
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold">1</button>
-                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">2</button>
-                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">3</button>
-                            <span class="px-2">...</span>
-                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">63</button>
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
+                    <div class="border-t border-gray-100 p-6">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="text-sm text-gray-600" id="paginationInfo">
+                                Affichage de <span class="font-semibold">0</span> à <span class="font-semibold">0</span> sur <span class="font-semibold">0</span> utilisateurs
+                            </div>
+                            <div id="paginationControls" class="flex items-center space-x-2 flex-wrap justify-center">
+                                <!-- Pagination buttons will be generated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -650,178 +609,477 @@
     </div>
     
     <script>
-        // Modal functions
+        // Modal functions (for the add user modal if it exists)
         function openAddUserModal() {
-            document.getElementById('modalTitle').textContent = 'Ajouter un utilisateur';
-            document.getElementById('userForm').reset();
-            document.getElementById('userId').value = '';
-            document.getElementById('password').required = true;
-            document.getElementById('passwordRequired').classList.remove('hidden');
-            document.getElementById('userModal').classList.remove('hidden');
+            const modal = document.getElementById('userModal');
+            if (modal) {
+                document.getElementById('modalTitle').textContent = 'Ajouter un utilisateur';
+                const form = document.getElementById('userForm');
+                if (form) form.reset();
+                const userId = document.getElementById('userId');
+                if (userId) userId.value = '';
+                const password = document.getElementById('password');
+                if (password) password.required = true;
+                const passwordRequired = document.getElementById('passwordRequired');
+                if (passwordRequired) passwordRequired.classList.remove('hidden');
+                modal.classList.remove('hidden');
+            }
         }
         
         function closeUserModal() {
-            document.getElementById('userModal').classList.add('hidden');
+            const modal = document.getElementById('userModal');
+            if (modal) modal.classList.add('hidden');
         }
         
+        // Global functions that can be called from dynamically generated HTML
         function editUser(userId) {
-            document.getElementById('modalTitle').textContent = 'Modifier l\'utilisateur';
-            document.getElementById('userId').value = userId;
-            document.getElementById('password').required = false;
-            document.getElementById('passwordRequired').classList.add('hidden');
-            
-            // Fetch user data and populate form (AJAX call here)
-            // For demo purposes:
-            document.getElementById('userModal').classList.remove('hidden');
+            if (typeof userManager !== 'undefined') {
+                userManager.editUser(userId);
+            } else {
+                console.log('Edit user:', userId);
+            }
         }
         
         function viewUser(userId) {
-            window.location.href = '${pageContext.request.contextPath}/admin/users/' + userId;
-        }
-        
-        function toggleUserStatus(userId) {
-            if (confirm('Êtes-vous sûr de vouloir changer le statut de cet utilisateur ?')) {
-                // AJAX call to toggle status
-                console.log('Toggle status for user:', userId);
-            }
-        }
-        
-        function deleteUser(userId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
-                // AJAX call to delete user
-                console.log('Delete user:', userId);
-            }
-        }
-        
-            let form= document.getElementById('userForm');
-        // Form submission
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            showSnackbar("Enregistrement de l'utilisateur...", 'info', true);
-
-            // Create FormData object
-            const formData = new FormData(this);
-
-            // Debug: Log what we're sending
-            console.log('Form data being sent:');
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
-
-
-            fetch("${pageContext.request.contextPath}/admin/users", {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-
-                showSnackbar(data.message, 'success');
-                console.log('Success:', data);
-                closeUserModal();
-            })
-            .catch((error) => {
-                showSnackbar("Erreur lors de l'enregistrement de l'utilisateur.", 'error');
-                console.error('Error:', error);
-            });
-        });
-
-        // Snackbar with loading animation
-        function showSnackbar(message, type = 'success', loading = false) {
-            const existing = document.getElementById('snackbar');
-            if (existing) existing.remove();
-
-            const snackbar = document.createElement('div');
-            snackbar.id = 'snackbar';
-
-            // Use string concatenation instead of template literals to avoid JSP EL parsing issues
-            let bgColor = 'bg-gray-800';
-            if (type === 'success') bgColor = 'bg-green-600';
-            else if (type === 'error') bgColor = 'bg-red-600';
-
-            snackbar.className = 'fixed bottom-6 right-6 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-semibold flex items-center space-x-3 transition-all ' + bgColor;
-
-            if (loading) {
-                snackbar.innerHTML = '<span class="loader mr-3"></span><span>' + message + '</span>';
+            if (typeof userManager !== 'undefined') {
+                userManager.viewUser(userId);
             } else {
-                let iconClass = 'fa-info-circle';
-                if (type === 'success') iconClass = 'fa-check-circle';
-                else if (type === 'error') iconClass = 'fa-times-circle';
-
-                snackbar.innerHTML = '<i class="fas ' + iconClass + ' text-xl"></i><span>' + message + '</span>';
-            }
-
-            document.body.appendChild(snackbar);
-
-            if (!loading) {
-                setTimeout(() => {
-                    snackbar.classList.add('opacity-0', 'pointer-events-none');
-                    setTimeout(() => snackbar.remove(), 500);
-                }, 3000);
+                window.location.href = '${pageContext.request.contextPath}/admin/users/' + userId;
             }
         }
 
-        // Loader CSS
-        const style = document.createElement('style');
-        style.innerHTML = `
-.loader {
-  border: 3px solid #fff3;
-  border-top: 3px solid #fff;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  animation: spin 1s linear infinite;
-  display: inline-block;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg);}
-  100% { transform: rotate(360deg);}
-}
-`;
-        document.head.appendChild(style);
+        // ============================================
+        // User Management System
+        // ============================================
+        const userManager = {
+            state: {
+                currentPage: 1,
+                pageSize: 10,
+                searchTerm: '',
+                roleFilter: '',
+                statusFilter: '',
+                sortField: '',
+                sortOrder: 'asc',
+                totalElements: 0,
+                totalPages: 0,
+                loading: false,
+                abortController: null,
+                contextPath: ''
+            },
 
-        // Search and filters
-        document.getElementById('search').addEventListener('input', function() {
-            // Implement search logic
-            console.log('Search:', this.value);
-        });
-        
-        document.getElementById('roleFilter').addEventListener('change', function() {
-            // Implement role filter logic
-            console.log('Filter by role:', this.value);
-        });
-        
-        document.getElementById('statusFilter').addEventListener('change', function() {
-            // Implement status filter logic
-            console.log('Filter by status:', this.value);
-        });
+            init(contextPath) {
+                this.state.contextPath = contextPath || '';
+                this.bindEventListeners();
+                this.loadUsers();
+            },
 
-        // Show/hide specific fields based on role selection
-        document.querySelectorAll('input[name="role"]').forEach(function(el) {
-            el.addEventListener('change', function() {
-                const role = this.value;
-
-                // Hide all specific fields
-                document.getElementById('patientFields').classList.add('hidden');
-                document.getElementById('doctorFields').classList.add('hidden');
-                document.getElementById('staffFields').classList.add('hidden');
-                document.getElementById('adminFields').classList.add('hidden');
-
-                // Show specific fields based on selected role
-                if (role === 'PATIENT') {
-                    document.getElementById('patientFields').classList.remove('hidden');
-                } else if (role === 'DOCTOR') {
-                    document.getElementById('doctorFields').classList.remove('hidden');
-                } else if (role === 'STAFF') {
-                    document.getElementById('staffFields').classList.remove('hidden');
-                } else if (role === 'ADMIN') {
-                    document.getElementById('adminFields').classList.remove('hidden');
+            bindEventListeners() {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    let searchTimeout;
+                    searchInput.addEventListener('input', (e) => {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(() => {
+                            this.state.searchTerm = e.target.value;
+                            this.state.currentPage = 1;
+                            this.loadUsers();
+                        }, 500);
+                    });
                 }
+
+                const roleFilter = document.getElementById('roleFilter');
+                if (roleFilter) {
+                    roleFilter.addEventListener('change', (e) => {
+                        this.state.roleFilter = e.target.value;
+                        this.state.currentPage = 1;
+                        this.loadUsers();
+                    });
+                }
+
+                const statusFilter = document.getElementById('statusFilter');
+                if (statusFilter) {
+                    statusFilter.addEventListener('change', (e) => {
+                        this.state.statusFilter = e.target.value;
+                        this.state.currentPage = 1;
+                        this.loadUsers();
+                    });
+                }
+
+                const pageSizeSelector = document.getElementById('pageSizeSelector');
+                if (pageSizeSelector) {
+                    pageSizeSelector.addEventListener('change', (e) => {
+                        this.state.pageSize = parseInt(e.target.value);
+                        this.state.currentPage = 1;
+                        this.loadUsers();
+                    });
+                }
+
+                const selectAll = document.getElementById('selectAll');
+                if (selectAll) {
+                    selectAll.addEventListener('change', (e) => {
+                        const checkboxes = document.querySelectorAll('#usersTableBody input[type="checkbox"]');
+                        checkboxes.forEach(cb => cb.checked = e.target.checked);
+                    });
+                }
+            },
+
+            async loadUsers() {
+                if (this.state.loading && this.state.abortController) {
+                    this.state.abortController.abort();
+                }
+
+                this.state.loading = true;
+                this.state.abortController = new AbortController();
+                this.showLoading(true);
+
+                try {
+                    const params = new URLSearchParams({
+                        page: this.state.currentPage,
+                        size: this.state.pageSize
+                    });
+
+                    if (this.state.searchTerm) params.append('search', this.state.searchTerm);
+                    if (this.state.roleFilter) params.append('role', this.state.roleFilter);
+                    if (this.state.statusFilter) params.append('status', this.state.statusFilter);
+                    if (this.state.sortField) {
+                        params.append('sort', this.state.sortField);
+                        params.append('order', this.state.sortOrder);
+                    }
+
+                    const url = this.state.contextPath + '/api/admin/users?' + params.toString();
+                    const response = await fetch(url, { signal: this.state.abortController.signal });
+
+                    if (!response.ok) throw new Error('Failed to fetch users');
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        this.state.totalElements = data.data.pagination.totalElements;
+                        this.state.totalPages = data.data.pagination.totalPages;
+                        this.renderUsers(data.data.users);
+                        this.renderPagination();
+                        this.showToast('Utilisateurs chargés avec succès', 'success');
+                    } else {
+                        throw new Error(data.message || 'Unknown error');
+                    }
+                } catch (error) {
+                    if (error.name === 'AbortError') return;
+                    console.error('Error loading users:', error);
+                    this.showEmptyState('error', 'Erreur de chargement', 'Impossible de charger les utilisateurs.');
+                } finally {
+                    this.state.loading = false;
+                    this.showLoading(false);
+                }
+            },
+
+            renderUsers(users) {
+                const tbody = document.getElementById('usersTableBody');
+                if (!users || users.length === 0) {
+                    this.showEmptyState('empty', 'Aucun utilisateur trouvé', 'Aucun utilisateur ne correspond à vos critères.');
+                    return;
+                }
+
+                tbody.innerHTML = users.map(user => {
+                    const userId = this.escapeHtml(user.id);
+                    const userName = this.escapeHtml(user.name);
+                    const userEmail = this.escapeHtml(user.email);
+                    const userPhone = user.phone ? this.escapeHtml(user.phone) : 'N/A';
+                    const userInitial = user.name ? this.escapeHtml(user.name.substring(0, 1).toUpperCase()) : 'U';
+                    const userIdShort = this.escapeHtml(user.id.substring(0, 8));
+                    const statusClass = user.active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200';
+                    const statusIcon = user.active ? 'fa-check-circle' : 'fa-times-circle';
+                    const statusText = user.active ? 'Actif' : 'Inactif';
+                    const roleBadge = this.getRoleBadge(user.role);
+                    
+                    return '<tr class="hover:bg-gray-50 transition-colors">' +
+                        '<td class="px-6 py-4"><input type="checkbox" class="w-5 h-5 text-primary-600 rounded" value="' + userId + '"></td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' +
+                            '<div class="flex items-center">' +
+                                '<div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">' + userInitial + '</div>' +
+                                '<div><div class="font-semibold text-gray-900">' + userName + '</div><div class="text-sm text-gray-500">ID: ' + userIdShort + '...</div></div>' +
+                            '</div>' +
+                        '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' + roleBadge + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"><i class="fas fa-envelope text-gray-400 mr-2"></i>' + userEmail + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"><i class="fas fa-phone text-gray-400 mr-2"></i>' + userPhone + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' +
+                            '<button data-user-id="' + userId + '" data-user-status="' + user.active + '" class="toggle-status-btn px-3 py-1 text-xs font-bold rounded-full transition-all ' + statusClass + '"><i class="fas ' + statusIcon + ' mr-1"></i>' + statusText + '</button>' +
+                        '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">' +
+                            '<button data-user-id="' + userId + '" class="view-user-btn text-blue-600 hover:text-blue-700 font-semibold transition-colors" title="Voir"><i class="fas fa-eye"></i></button>' +
+                            '<button data-user-id="' + userId + '" class="edit-user-btn text-primary-600 hover:text-primary-700 font-semibold transition-colors" title="Modifier"><i class="fas fa-edit"></i></button>' +
+                            '<button data-user-id="' + userId + '" data-user-name="' + userName + '" class="delete-user-btn text-red-600 hover:text-red-700 font-semibold transition-colors" title="Supprimer"><i class="fas fa-trash"></i></button>' +
+                        '</td></tr>';
+                }).join('');
+
+                this.attachRowEventListeners();
+            },
+
+            attachRowEventListeners() {
+                document.querySelectorAll('.toggle-status-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const userId = e.currentTarget.dataset.userId;
+                        const currentStatus = e.currentTarget.dataset.userStatus === 'true';
+                        this.toggleStatus(userId, currentStatus);
+                    });
+                });
+
+                document.querySelectorAll('.view-user-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.viewUser(e.currentTarget.dataset.userId);
+                    });
+                });
+
+                document.querySelectorAll('.edit-user-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.editUser(e.currentTarget.dataset.userId);
+                    });
+                });
+
+                document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.confirmDelete(e.currentTarget.dataset.userId, e.currentTarget.dataset.userName);
+                    });
+                });
+            },
+
+            renderPagination() {
+                const currentPage = this.state.currentPage;
+                const pageSize = this.state.pageSize;
+                const totalPages = this.state.totalPages;
+                const totalElements = this.state.totalElements;
+                
+                const startIndex = totalElements === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+                const endIndex = Math.min(currentPage * pageSize, totalElements);
+                
+                const paginationInfo = document.getElementById('paginationInfo');
+                if (paginationInfo) {
+                    paginationInfo.innerHTML = 'Affichage de <span class="font-semibold">' + startIndex + '</span> à <span class="font-semibold">' + endIndex + '</span> sur <span class="font-semibold">' + totalElements + '</span> utilisateurs';
+                }
+
+                const controls = document.getElementById('paginationControls');
+                if (!controls) return;
+
+                let html = '';
+                const firstDisabled = currentPage === 1;
+                const lastDisabled = currentPage === totalPages;
+
+                html += '<button data-page="1" class="pagination-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ' + (firstDisabled ? 'opacity-50 cursor-not-allowed' : '') + '" ' + (firstDisabled ? 'disabled' : '') + '><i class="fas fa-angle-double-left"></i></button>';
+                html += '<button data-page="' + (currentPage - 1) + '" class="pagination-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ' + (firstDisabled ? 'opacity-50 cursor-not-allowed' : '') + '" ' + (firstDisabled ? 'disabled' : '') + '><i class="fas fa-chevron-left"></i></button>';
+
+                const maxButtons = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+                let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                if (endPage - startPage + 1 < maxButtons) startPage = Math.max(1, endPage - maxButtons + 1);
+
+                if (startPage > 1) html += '<span class="px-2 text-gray-400">...</span>';
+
+                for (let i = startPage; i <= endPage; i++) {
+                    const isActive = i === currentPage;
+                    html += '<button data-page="' + i + '" class="pagination-btn px-4 py-2 rounded-lg font-semibold transition-colors ' + (isActive ? 'bg-primary-600 text-white' : 'border border-gray-300 hover:bg-gray-50') + '">' + i + '</button>';
+                }
+
+                if (endPage < totalPages) html += '<span class="px-2 text-gray-400">...</span>';
+
+                html += '<button data-page="' + (currentPage + 1) + '" class="pagination-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ' + (lastDisabled ? 'opacity-50 cursor-not-allowed' : '') + '" ' + (lastDisabled ? 'disabled' : '') + '><i class="fas fa-chevron-right"></i></button>';
+                html += '<button data-page="' + totalPages + '" class="pagination-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ' + (lastDisabled ? 'opacity-50 cursor-not-allowed' : '') + '" ' + (lastDisabled ? 'disabled' : '') + '><i class="fas fa-angle-double-right"></i></button>';
+
+                controls.innerHTML = html;
+
+                document.querySelectorAll('.pagination-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (!e.currentTarget.disabled) {
+                            this.goToPage(parseInt(e.currentTarget.dataset.page));
+                        }
+                    });
+                });
+            },
+
+            goToPage(page) {
+                if (page < 1 || page > this.state.totalPages) return;
+                this.state.currentPage = page;
+                this.loadUsers();
+            },
+
+            sortBy(field) {
+                if (this.state.sortField === field) {
+                    this.state.sortOrder = this.state.sortOrder === 'asc' ? 'desc' : 'asc';
+                } else {
+                    this.state.sortField = field;
+                    this.state.sortOrder = 'asc';
+                }
+                this.loadUsers();
+            },
+
+            async toggleStatus(userId, currentStatus) {
+                if (!confirm('Voulez-vous vraiment ' + (currentStatus ? 'désactiver' : 'activer') + ' cet utilisateur ?')) return;
+
+                try {
+                    const response = await fetch(this.state.contextPath + '/api/admin/users/' + userId + '/status', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ active: !currentStatus })
+                    });
+
+                    if (response.ok) {
+                        this.showToast('Statut mis à jour avec succès', 'success');
+                        this.loadUsers();
+                    } else {
+                        throw new Error('Failed to update status');
+                    }
+                } catch (error) {
+                    this.showToast('Erreur lors de la mise à jour du statut', 'error');
+                }
+            },
+
+            viewUser(userId) {
+                console.log('View user:', userId);
+                this.showToast('Fonction de visualisation à implémenter', 'info');
+            },
+
+            editUser(userId) {
+                console.log('Edit user:', userId);
+                this.showToast('Fonction d\'édition à implémenter', 'info');
+            },
+
+            confirmDelete(userId, userName) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer l\'utilisateur "' + userName + '" ? Cette action est irréversible.')) {
+                    this.deleteUser(userId);
+                }
+            },
+
+            async deleteUser(userId) {
+                this.showToast('Fonction de suppression à implémenter', 'info');
+            },
+
+            showLoading(show) {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    if (show) overlay.classList.remove('hidden');
+                    else overlay.classList.add('hidden');
+                }
+            },
+
+            showEmptyState(type, title, message) {
+                const tbody = document.getElementById('usersTableBody');
+                if (!tbody) return;
+
+                const icon = type === 'error' ? 'fa-exclamation-triangle' : 'fa-users';
+                const color = type === 'error' ? 'text-red-600' : 'text-gray-500';
+                const retryButton = type === 'error' ? '<button class="retry-load-btn mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">Réessayer</button>' : '';
+                
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center">' +
+                    '<div class="flex flex-col items-center space-y-3">' +
+                        '<i class="fas ' + icon + ' text-5xl ' + color + '"></i>' +
+                        '<h3 class="text-xl font-bold text-gray-900">' + this.escapeHtml(title) + '</h3>' +
+                        '<p class="text-gray-600">' + this.escapeHtml(message) + '</p>' +
+                        retryButton +
+                    '</div></td></tr>';
+
+                const retryBtn = tbody.querySelector('.retry-load-btn');
+                if (retryBtn) retryBtn.addEventListener('click', () => this.loadUsers());
+            },
+
+            showToast(message, type) {
+                if (!type) type = 'success';
+                const existing = document.getElementById('toast');
+                if (existing) existing.remove();
+
+                const toast = document.createElement('div');
+                toast.id = 'toast';
+                const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600', warning: 'bg-orange-600' };
+                const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+
+                toast.className = 'fixed bottom-6 right-6 z-50 px-6 py-4 rounded-lg shadow-2xl text-white font-semibold flex items-center space-x-3 animate-slide-in ' + colors[type];
+                toast.innerHTML = '<i class="fas ' + icons[type] + ' text-xl"></i><span>' + this.escapeHtml(message) + '</span>';
+
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-x-full', 'transition-all');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+
+            getRoleBadge(role) {
+                const configs = {
+                    'ADMIN': { label: 'Admin', icon: 'fa-user-shield', bg: 'bg-orange-100', text: 'text-orange-700' },
+                    'DOCTOR': { label: 'Médecin', icon: 'fa-user-md', bg: 'bg-secondary-100', text: 'text-secondary-700' },
+                    'PATIENT': { label: 'Patient', icon: 'fa-user-injured', bg: 'bg-blue-100', text: 'text-blue-700' },
+                    'STAFF': { label: 'Personnel', icon: 'fa-user-tie', bg: 'bg-purple-100', text: 'text-purple-700' }
+                };
+                const config = configs[role] || configs['PATIENT'];
+                return '<span class="px-3 py-1 text-xs font-bold rounded-full ' + config.bg + ' ' + config.text + '"><i class="fas ' + config.icon + ' mr-1"></i>' + config.label + '</span>';
+            },
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text || '';
+                return div.innerHTML;
+            }
+        };
+
+        // Form submission handler (if form exists)
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('userForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    
+                    fetch("${pageContext.request.contextPath}/admin/users", {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        closeUserModal();
+                        // Reload users if userManager exists
+                        if (typeof userManager !== 'undefined') {
+                            userManager.loadUsers();
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                });
+            }
+
+            // Show/hide specific fields based on role selection (if form exists)
+            document.querySelectorAll('input[name="role"]').forEach(function(el) {
+                el.addEventListener('change', function() {
+                    const role = this.value;
+                    const patientFields = document.getElementById('patientFields');
+                    const doctorFields = document.getElementById('doctorFields');
+                    const staffFields = document.getElementById('staffFields');
+                    const adminFields = document.getElementById('adminFields');
+
+                    // Hide all specific fields
+                    if (patientFields) patientFields.classList.add('hidden');
+                    if (doctorFields) doctorFields.classList.add('hidden');
+                    if (staffFields) staffFields.classList.add('hidden');
+                    if (adminFields) adminFields.classList.add('hidden');
+
+                    // Show specific fields based on selected role
+                    if (role === 'PATIENT' && patientFields) {
+                        patientFields.classList.remove('hidden');
+                    } else if (role === 'DOCTOR' && doctorFields) {
+                        doctorFields.classList.remove('hidden');
+                    } else if (role === 'STAFF' && staffFields) {
+                        staffFields.classList.remove('hidden');
+                    } else if (role === 'ADMIN' && adminFields) {
+                        adminFields.classList.remove('hidden');
+                    }
+                });
             });
+
+            // Initialize user manager
+            if (typeof userManager !== 'undefined') {
+                userManager.init('${pageContext.request.contextPath}');
+            }
         });
     </script>
 </body>
 </html>
+
