@@ -21,8 +21,12 @@ public class HomeServlet extends HttpServlet {
         
         // If user is logged in, redirect to appropriate dashboard
         if (session != null && session.getAttribute("user") != null) {
-            String role = (String) session.getAttribute("userRole");
-            
+            Object roleObj = session.getAttribute("userRole");
+            String role = null;
+            if (roleObj != null) {
+                role = roleObj instanceof String ? (String) roleObj : roleObj.toString();
+            }
+
             switch (role) {
                 case "ADMIN":
                     resp.sendRedirect(req.getContextPath() + "/admin/dashboard");

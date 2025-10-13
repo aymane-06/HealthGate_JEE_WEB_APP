@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * RESTful API for User Management
  * Supports pagination, sorting, searching, and filtering
  */
-@WebServlet("/api/admin/users")
+@WebServlet(urlPatterns = {"/api/admin/users", "/api/admin/users/*"})
 public class AdminUsersApiServlet extends HttpServlet {
 
     @Inject
@@ -138,17 +138,71 @@ public class AdminUsersApiServlet extends HttpServlet {
             
             // Read body to get new status
             String body = req.getReader().lines().collect(Collectors.joining());
-            boolean newStatus = body.contains("\"active\":true");
+            
+            // Parse status from JSON: {"status": "ACTIVE"} or {"status": "INACTIVE"}
+            boolean newStatus;
+            if (body.contains("\"status\"")) {
+                newStatus = body.contains("\"ACTIVE\"");
+            } else {
+              throw new IllegalArgumentException("Invalid request body: missing 'status' field");
+            }
 
-            // TODO: Implement status update in UserService
-            // userService.updateUserStatus(userId, newStatus);
+            // Update user status
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.getWriter().write(buildErrorResponse("User not found"));
+                return;
+            }
+
+            user.setActive(newStatus);
+            userService.updateUser(user);
 
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write("{\"status\":\"success\",\"message\":\"User status updated\"}");
+            resp.getWriter().write("{\"status\":\"success\",\"message\":\"User status updated successfully\"}");
 
         } catch (Exception e) {
+            e.printStackTrace();
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write(buildErrorResponse(e.getMessage()));
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        try {
+            String pathInfo = req.getPathInfo(); // e.g., /{id}
+            
+            if (pathInfo == null || pathInfo.isEmpty()) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().write(buildErrorResponse("User ID required"));
+                return;
+            }
+
+            // Parse path: /{id}
+            String userId = pathInfo.substring(1); // Remove leading slash
+            
+            // Check if user exists
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.getWriter().write(buildErrorResponse("User not found"));
+                return;
+            }
+
+            // Delete user
+            userService.deleteUser(userId);
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.getWriter().write("{\"status\":\"success\",\"message\":\"User deleted successfully\"}");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write(buildErrorResponse("Error deleting user: " + e.getMessage()));
         }
     }
 

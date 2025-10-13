@@ -117,6 +117,12 @@
                         </a>
                     </li>
                     <li>
+                        <a href="${pageContext.request.contextPath}/admin/departments" class="flex items-center space-x-3 p-3 rounded-lg bg-primary-700/50 text-white">
+                            <i class="fas fa-building w-5"></i>
+                            <span class="font-medium">Départements</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="${pageContext.request.contextPath}/admin/appointments" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
                             <i class="fas fa-calendar-alt w-5"></i>
                             <span class="font-medium">Rendez-vous</span>
@@ -494,6 +500,14 @@
                         
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-code text-primary-600 mr-2"></i>Code de la spécialité <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="code" required placeholder="Ex: CARDIO"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-tag text-primary-600 mr-2"></i>Nom de la spécialité <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="name" required placeholder="Ex: Cardiologie"
@@ -550,26 +564,241 @@
     </div>
     
     <script>
-        // Toggle view
-        function toggleView() {
-            const cardView = document.getElementById('cardView');
-            const listView = document.getElementById('listView');
-            const viewText = document.getElementById('viewText');
-            const viewToggle = document.getElementById('viewToggle');
-            
-            if (cardView.classList.contains('hidden')) {
-                cardView.classList.remove('hidden');
-                listView.classList.add('hidden');
-                viewText.textContent = 'Vue liste';
-                viewToggle.innerHTML = '<i class="fas fa-th-list mr-2"></i><span id="viewText">Vue liste</span>';
-            } else {
-                cardView.classList.add('hidden');
-                listView.classList.remove('hidden');
-                viewText.textContent = 'Vue cartes';
-                viewToggle.innerHTML = '<i class="fas fa-th-large mr-2"></i><span id="viewText">Vue cartes</span>';
+        // ============================================
+        // Specialty Management System
+        // ============================================
+        const specialtyManager = {
+            state: {
+                currentPage: 1,
+                pageSize: 10,
+                searchTerm: '',
+                sortField: '',
+                sortOrder: 'asc',
+                totalElements: 0,
+                totalPages: 0,
+                loading: false,
+                abortController: null,
+                contextPath: '',
+                specialtiesCache: [] // Store fetched specialties here
+            },
+
+            init(contextPath) {
+                this.state.contextPath = contextPath || '';
+                this.bindEventListeners();
+                this.loadSpecialties();
+            },
+
+            bindEventListeners() {
+                const searchInput = document.getElementById('searchSpecialty');
+                if (searchInput) {
+                    let searchTimeout;
+                    searchInput.addEventListener('input', (e) => {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(() => {
+                            this.state.searchTerm = e.target.value;
+                            this.state.currentPage = 1;
+                            this.loadSpecialties();
+                        }, 500);
+                    });
+                }
+            },
+
+            async loadSpecialties() {
+                if (this.state.loading && this.state.abortController) {
+                    this.state.abortController.abort();
+                }
+
+                this.state.loading = true;
+                this.state.abortController = new AbortController();
+                this.showLoading(true);
+
+                try {
+                    const params = new URLSearchParams({
+                        page: this.state.currentPage,
+                        size: this.state.pageSize
+                    });
+
+                    if (this.state.searchTerm) params.append('search', this.state.searchTerm);
+                    if (this.state.sortField) {
+                        params.append('sort', this.state.sortField);
+                        params.append('order', this.state.sortOrder);
+                    }
+
+                    const url = this.state.contextPath + '/api/admin/specialties?' + params.toString();
+                    const response = await fetch(url, { signal: this.state.abortController.signal });
+
+                    if (!response.ok) throw new Error('Failed to fetch specialties');
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        this.state.totalElements = data.data.pagination.totalElements;
+                        this.state.totalPages = data.data.pagination.totalPages;
+                        this.state.specialtiesCache = data.data.specialties; // Store specialties in cache
+                        this.renderSpecialties(data.data.specialties);
+                        this.showToast('Spécialités chargées avec succès', 'success');
+                    } else {
+                        throw new Error(data.message || 'Unknown error');
+                    }
+                } catch (error) {
+                    if (error.name === 'AbortError') return;
+                    console.error('Error loading specialties:', error);
+                    this.showToast('Erreur de chargement', 'error');
+                } finally {
+                    this.state.loading = false;
+                    this.showLoading(false);
+                }
+            },
+
+            renderSpecialties(specialties) {
+                console.log(specialties)
+                const cardView = document.getElementById('cardView');
+                if (!specialties || specialties.length === 0) {
+                    cardView.innerHTML = '<div class="col-span-full text-center py-12"><i class="fas fa-inbox text-5xl text-gray-400 mb-4"></i><p class="text-gray-600">Aucune spécialité trouvée</p></div>';
+                    return;
+                }
+
+                cardView.innerHTML = specialties.map(specialty => {
+                    const specialtyId = this.escapeHtml(specialty.id);
+                    const specialtyName = this.escapeHtml(specialty.name);
+                    const specialtyCode = this.escapeHtml(specialty.code);
+                    const specialtyDesc = this.escapeHtml(specialty.description || 'Aucune description');
+                    const doctorsCount = specialty.doctorsCount || 0;
+                    
+                    return `<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">
+                        <div class="bg-gradient-to-br from-primary-500 to-primary-600 p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-stethoscope text-3xl"></i>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-4xl font-bold">${doctorsCount}</p>
+                                    <p class="text-primary-100 text-sm">Médecins</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">${specialtyName}</h3>
+                            <p class="text-sm text-gray-600 mb-2"><strong>Code:</strong> ${specialtyCode}</p>
+                            <p class="text-sm text-gray-600 mb-4">${specialtyDesc}</p>
+                            <div class="flex items-center space-x-2">
+                                <button data-specialty-id="${specialtyId}" class="edit-specialty-btn flex-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold hover:bg-blue-100 transition-colors">
+                                    <i class="fas fa-edit mr-2"></i>Modifier
+                                </button>
+                                <button data-specialty-id="${specialtyId}" data-specialty-name="${specialtyName}" class="delete-specialty-btn px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                this.attachEventListeners();
+            },
+
+            attachEventListeners() {
+                document.querySelectorAll('.edit-specialty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.editSpecialty(e.currentTarget.dataset.specialtyId);
+                    });
+                });
+
+                document.querySelectorAll('.delete-specialty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.confirmDelete(e.currentTarget.dataset.specialtyId, e.currentTarget.dataset.specialtyName);
+                    });
+                });
+            },
+
+            editSpecialty(specialtyId) {
+                // Find specialty in cache
+                const specialty = this.state.specialtiesCache.find(s => s.id === specialtyId);
+                if (!specialty) {
+                    this.showToast('Spécialité non trouvée', 'error');
+                    return;
+                }
+                
+                // Open modal
+                const modal = document.getElementById('specialtyModal');
+                if (!modal) {
+                    this.showToast('Modal non trouvé', 'error');
+                    return;
+                }
+                
+                // Set modal title
+                document.getElementById('modalTitle').textContent = 'Modifier la spécialité';
+                
+                // Set specialtyId in hidden field
+                document.getElementById('specialtyId').value = specialty.id;
+                
+                // Set form fields
+                const codeInput = document.querySelector('input[name="code"]');
+                const nameInput = document.querySelector('input[name="name"]');
+                const descTextarea = document.querySelector('textarea[name="description"]');
+                
+                if (codeInput) codeInput.value = specialty.code || '';
+                if (nameInput) nameInput.value = specialty.name || '';
+                if (descTextarea) descTextarea.value = specialty.description || '';
+                
+                // Show modal
+                modal.classList.remove('hidden');
+            },
+
+            confirmDelete(specialtyId, specialtyName) {
+                if (confirm(`Êtes-vous sûr de vouloir supprimer la spécialité "${specialtyName}" ? Cette action est irréversible.`)) {
+                    this.deleteSpecialty(specialtyId);
+                }
+            },
+
+            async deleteSpecialty(specialtyId) {
+                try {
+                    const response = await fetch(this.state.contextPath + '/api/admin/specialties/' + specialtyId, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        this.showToast('Spécialité supprimée avec succès', 'success');
+                        this.loadSpecialties();
+                    } else {
+                        const data = await response.json();
+                        throw new Error(data.message || 'Failed to delete specialty');
+                    }
+                } catch (error) {
+                    this.showToast('Erreur: ' + error.message, 'error');
+                }
+            },
+
+            showLoading(show) {
+                // Add loading indicator if needed
+            },
+
+            showToast(message, type) {
+                if (!type) type = 'success';
+                const existing = document.getElementById('toast');
+                if (existing) existing.remove();
+
+                const toast = document.createElement('div');
+                toast.id = 'toast';
+                const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600', warning: 'bg-orange-600' };
+                const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+
+                toast.className = 'fixed bottom-6 right-6 z-50 px-6 py-4 rounded-lg shadow-2xl text-white font-semibold flex items-center space-x-3 ' + colors[type];
+                toast.innerHTML = '<i class="fas ' + icons[type] + ' text-xl"></i><span>' + this.escapeHtml(message) + '</span>';
+
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-x-full', 'transition-all');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text || '';
+                return div.innerHTML;
             }
-        }
-        
+        };
+
         // Modal functions
         function openAddSpecialtyModal() {
             document.getElementById('modalTitle').textContent = 'Ajouter une spécialité';
@@ -582,34 +811,40 @@
             document.getElementById('specialtyModal').classList.add('hidden');
         }
         
-        function editSpecialty(id) {
-            document.getElementById('modalTitle').textContent = 'Modifier la spécialité';
-            document.getElementById('specialtyId').value = id;
-            // Fetch and populate form data here
-            document.getElementById('specialtyModal').classList.remove('hidden');
-        }
-        
-        function viewSpecialty(id) {
-            window.location.href = '${pageContext.request.contextPath}/admin/specialties/' + id;
-        }
-        
-        function deleteSpecialty(id) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette spécialité ?')) {
-                console.log('Delete specialty:', id);
+        // Form submission handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('specialtyForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    
+                    fetch("${pageContext.request.contextPath}/admin/specialties", {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            specialtyManager.showToast(data.message, 'success');
+                            closeSpecialtyModal();
+                            specialtyManager.loadSpecialties();
+                        } else {
+                            specialtyManager.showToast(data.message, 'error');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        specialtyManager.showToast('Erreur lors de la sauvegarde', 'error');
+                    });
+                });
             }
-        }
-        
-        // Form submission
-        document.getElementById('specialtyForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            console.log('Saving specialty...');
-            closeSpecialtyModal();
-        });
-        
-        // Search
-        document.getElementById('searchSpecialty').addEventListener('input', function() {
-            console.log('Search:', this.value);
+
+            // Initialize specialty manager
+            if (typeof specialtyManager !== 'undefined') {
+                specialtyManager.init('${pageContext.request.contextPath}');
+            }
         });
     </script>
 </body>

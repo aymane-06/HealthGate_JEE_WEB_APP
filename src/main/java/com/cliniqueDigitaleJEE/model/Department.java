@@ -19,12 +19,59 @@ public class Department {
     private String description;
     @OneToMany(mappedBy = "department")
     private List<Specialty> specialties;
+    @OneToOne(
+            mappedBy = "responsibleDepartment",
+            cascade = CascadeType.ALL,
+            optional = true
+    )
+    private Doctor responsibleDoctor;
+    @Column(nullable = true)
+    private String location;
+    @Column(nullable = true)
+    private String contactInfo;
+    @Column(nullable = true)
+    private String color;
+
+    public Doctor getResponsibleDoctor() {
+        return responsibleDoctor;
+    }
+
+    public void setResponsibleDoctor(Doctor responsibleDoctor) {
+        this.responsibleDoctor = responsibleDoctor;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getContactInfo() {
+        return contactInfo;
+    }
+
+    public void setContactInfo(String contactInfo) {
+        this.contactInfo = contactInfo;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+
 
     public Department() {}
-    public Department(String code, String name, String description) {
+    public Department(String code, String name, String description,Doctor responsibleDoctor) {
         this.code = code;
         this.name = name;
         this.description = description;
+        this.responsibleDoctor = responsibleDoctor;
     }
 
     public UUID getId() {

@@ -33,15 +33,7 @@ public class AdminUsersServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         
-        // TODO: Fetch users from service layer
-        try {
-            List<User> users= userService.getAllUsers();
-            users.stream().forEach(System.out::println);
-
-            req.setAttribute("users",users);
-        } catch (Exception e) {
-            req.setAttribute("error", "Erreur lors du chargement des utilisateurs: " + e.getMessage());
-        }
+        
 
         req.getRequestDispatcher("/WEB-INF/admin/users.jsp").forward(req, resp);
     }
@@ -49,6 +41,10 @@ public class AdminUsersServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
+
+        // Check if this is an update (userId present) or create (no userId)
+        String userId = req.getParameter("userId");
+        boolean isUpdate = userId != null && !userId.trim().isEmpty();
 
         // Extract specific form fields for debugging
         String role = req.getParameter("role");
@@ -59,38 +55,81 @@ public class AdminUsersServlet extends HttpServlet {
         String password = req.getParameter("password");
         String active = req.getParameter("active");
 
+        System.out.println("Operation: " + (isUpdate ? "UPDATE" : "CREATE"));
+        System.out.println("User ID: " + userId);
         System.out.println("Extracted values:");
         System.out.println("  Role: " + role);
         System.out.println("  First Name: " + firstName);
         System.out.println("  Last Name: " + lastName);
         System.out.println("  Email: " + email);
         System.out.println("  Phone: " + phone);
-        System.out.println("  Password: " + (password != null ? "[HIDDEN]" : "null"));
+        System.out.println("  Password: " + (password != null && !password.isEmpty() ? "[HIDDEN]" : "null"));
         System.out.println("  Active: " + active);
 
-            String name = firstName + " " + lastName;
+        String name = firstName + " " + lastName;
+
+        // If updating, get existing user first
+        User existingUser = null;
+        if (isUpdate) {
+            existingUser = userService.getUserById(userId);
+            if (existingUser == null) {
+                String jsonResponse = "{\"status\":\"error\",\"message\":\"User not found\"}";
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.getWriter().write(jsonResponse);
+                return;
+            }
+        }
 
         // Role-specific fields based on role
         if ("PATIENT".equals(role)) {
             String cin = req.getParameter("cin");
             String bloodType = req.getParameter("bloodType");
-            LocalDate birthDate = LocalDate.parse(req.getParameter("birthDate"));
-            Gender gender = Gender.valueOf(req.getParameter("gender"));
+            String birthDateStr = req.getParameter("birthDate");
+            LocalDate birthDate = (birthDateStr != null && !birthDateStr.isEmpty()) ? LocalDate.parse(birthDateStr) : null;
+            String genderStr = req.getParameter("gender");
+            Gender gender = (genderStr != null && !genderStr.isEmpty()) ? Gender.valueOf(genderStr) : null;
             String address = req.getParameter("address");
 
-
-            try{
-                Patient patient = new Patient(name, email, password, phone, cin, address, birthDate,gender, bloodType);
-                userService.registerUser(patient);
-                String jsonResponse = String.format(
-                        "{\"status\":\"success\",\"message\":\"Patient registered successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
-                        role,
-                        firstName,
-                        lastName,
-                        email
-                );
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().write(jsonResponse);
+            try {
+                Patient patient;
+                if (isUpdate && existingUser instanceof Patient) {
+                    // Update existing patient
+                    patient = (Patient) existingUser;
+                    patient.setName(name);
+                    patient.setEmail(email);
+                    patient.setPhone(phone);
+                    patient.setCIN(cin);
+                    patient.setAddress(address);
+                    patient.setBirthDate(birthDate);
+                    patient.setGender(gender);
+                    patient.setBloodType(bloodType);
+                    patient.setActive("true".equals(active));
+                    
+                    // Only update password if provided
+                    if (password != null && !password.isEmpty()) {
+                        patient.setPassword(password);
+                    }
+                    
+                    userService.updateUser(patient);
+                    
+                    String jsonResponse = String.format(
+                            "{\"status\":\"success\",\"message\":\"Patient updated successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
+                            role, firstName, lastName, email
+                    );
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.getWriter().write(jsonResponse);
+                } else {
+                    // Create new patient
+                    patient = new Patient(name, email, password, phone, cin, address, birthDate, gender, bloodType);
+                    userService.registerUser(patient);
+                    
+                    String jsonResponse = String.format(
+                            "{\"status\":\"success\",\"message\":\"Patient registered successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
+                            role, firstName, lastName, email
+                    );
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.getWriter().write(jsonResponse);
+                }
                 return;
 
             } catch (Exception e) {
@@ -101,30 +140,52 @@ public class AdminUsersServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().write(jsonResponse);
                 return;
-
             }
-
-
 
         } else if ("DOCTOR".equals(role)) {
             String matricule = req.getParameter("matricule");
             String title = req.getParameter("title");
             String specialtyId = req.getParameter("specialtyId");
 
-            try{
-                Doctor doctor= new Doctor(name, email, password,matricule, title);
-                userService.registerUser(doctor);
-                String jsonResponse = String.format(
-                        "{\"status\":\"success\",\"message\":\"Doctor registered successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
-                        role,
-                        firstName,
-                        lastName,
-                        email
-                );
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().write(jsonResponse);
+            try {
+                Doctor doctor;
+                if (isUpdate && existingUser instanceof Doctor) {
+                    // Update existing doctor
+                    doctor = (Doctor) existingUser;
+                    doctor.setName(name);
+                    doctor.setEmail(email);
+                    doctor.setMatricule(matricule);
+                    doctor.setTitle(title);
+                    doctor.setActive("true".equals(active));
+                    
+                    // Only update password if provided
+                    if (password != null && !password.isEmpty()) {
+                        doctor.setPassword(password);
+                    }
+                    
+                    userService.updateUser(doctor);
+                    
+                    String jsonResponse = String.format(
+                            "{\"status\":\"success\",\"message\":\"Doctor updated successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
+                            role, firstName, lastName, email
+                    );
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.getWriter().write(jsonResponse);
+                } else {
+                    // Create new doctor
+                    doctor = new Doctor(name, email, password, matricule, title);
+                    userService.registerUser(doctor);
+                    
+                    String jsonResponse = String.format(
+                            "{\"status\":\"success\",\"message\":\"Doctor registered successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
+                            role, firstName, lastName, email
+                    );
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.getWriter().write(jsonResponse);
+                }
                 return;
-            }catch (Exception e){
+                
+            } catch (Exception e) {
                 String jsonResponse = String.format(
                         "{\"status\":\"error\",\"message\":\"%s\"}",
                         e.getMessage()
@@ -138,19 +199,44 @@ public class AdminUsersServlet extends HttpServlet {
             String position = req.getParameter("position");
             String employeeId = req.getParameter("employeeId");
 
-            try{
-                STAFF staff = new STAFF(name, email, password, position, employeeId);
-                userService.registerUser(staff);
-                String jsonResponse = String.format(
-                        "{\"status\":\"success\",\"message\":\"Staff registered successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
-                        role,
-                        firstName,
-                        lastName,
-                        email
-                );
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().write(jsonResponse);
+            try {
+                STAFF staff;
+                if (isUpdate && existingUser instanceof STAFF) {
+                    // Update existing staff
+                    staff = (STAFF) existingUser;
+                    staff.setName(name);
+                    staff.setEmail(email);
+                    staff.setPosition(position);
+                    staff.setEmployeeId(employeeId);
+                    staff.setActive("true".equals(active));
+                    
+                    // Only update password if provided
+                    if (password != null && !password.isEmpty()) {
+                        staff.setPassword(password);
+                    }
+                    
+                    userService.updateUser(staff);
+                    
+                    String jsonResponse = String.format(
+                            "{\"status\":\"success\",\"message\":\"Staff updated successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
+                            role, firstName, lastName, email
+                    );
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.getWriter().write(jsonResponse);
+                } else {
+                    // Create new staff
+                    staff = new STAFF(name, email, password, position, employeeId);
+                    userService.registerUser(staff);
+                    
+                    String jsonResponse = String.format(
+                            "{\"status\":\"success\",\"message\":\"Staff registered successfully\",\"data\":{\"role\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\",\"email\":\"%s\"}}",
+                            role, firstName, lastName, email
+                    );
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.getWriter().write(jsonResponse);
+                }
                 return;
+                
             } catch (Exception e) {
                 String jsonResponse = String.format(
                         "{\"status\":\"error\",\"message\":\"%s\"}",

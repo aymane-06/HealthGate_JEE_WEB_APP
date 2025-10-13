@@ -664,7 +664,8 @@
                 totalPages: 0,
                 loading: false,
                 abortController: null,
-                contextPath: ''
+                contextPath: '',
+                usersCache: [] // Store fetched users here
             },
 
             init(contextPath) {
@@ -755,6 +756,7 @@
                     if (data.status === 'success') {
                         this.state.totalElements = data.data.pagination.totalElements;
                         this.state.totalPages = data.data.pagination.totalPages;
+                        this.state.usersCache = data.data.users; // Store users in cache
                         this.renderUsers(data.data.users);
                         this.renderPagination();
                         this.showToast('Utilisateurs chargés avec succès', 'success');
@@ -911,23 +913,23 @@
             },
 
             async toggleStatus(userId, currentStatus) {
-                if (!confirm('Voulez-vous vraiment ' + (currentStatus ? 'désactiver' : 'activer') + ' cet utilisateur ?')) return;
-
                 try {
+                    const newStatus = currentStatus ? 'INACTIVE' : 'ACTIVE';
                     const response = await fetch(this.state.contextPath + '/api/admin/users/' + userId + '/status', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ active: !currentStatus })
+                        body: JSON.stringify({ status: newStatus })
                     });
 
                     if (response.ok) {
                         this.showToast('Statut mis à jour avec succès', 'success');
                         this.loadUsers();
                     } else {
-                        throw new Error('Failed to update status');
+                        const data = await response.json();
+                        throw new Error(data.message || 'Failed to update status');
                     }
                 } catch (error) {
-                    this.showToast('Erreur lors de la mise à jour du statut', 'error');
+                    this.showToast('Erreur: ' + error.message, 'error');
                 }
             },
 
@@ -937,8 +939,93 @@
             },
 
             editUser(userId) {
-                console.log('Edit user:', userId);
-                this.showToast('Fonction d\'édition à implémenter', 'info');
+                // Find user in cache
+                const user = this.state.usersCache.find(u => u.id === userId);
+                if (!user) {
+                    this.showToast('Utilisateur non trouvé', 'error');
+                    return;
+                }
+                
+                // Open modal
+                const modal = document.getElementById('userModal');
+                if (!modal) {
+                    this.showToast('Modal non trouvé', 'error');
+                    return;
+                }
+                
+                // Set modal title
+                document.getElementById('modalTitle').textContent = 'Modifier l\'utilisateur';
+                
+                // Set userId in hidden field
+                document.getElementById('userId').value = user.id;
+                
+                // Set role
+                const roleInputs = document.querySelectorAll('input[name="role"]');
+                roleInputs.forEach(input => {
+                    if (input.value === user.role) {
+                        input.checked = true;
+                        // Trigger change event to show role-specific fields
+                        input.dispatchEvent(new Event('change'));
+                    }
+                });
+                
+                // Split name into first and last name
+                const nameParts = user.name ? user.name.split(' ') : ['', ''];
+                const firstNameInput = document.querySelector('input[name="firstName"]');
+                const lastNameInput = document.querySelector('input[name="lastName"]');
+                if (firstNameInput) firstNameInput.value = nameParts[0] || '';
+                if (lastNameInput) lastNameInput.value = nameParts.slice(1).join(' ') || '';
+                
+                // Set common fields
+                const emailInput = document.querySelector('input[name="email"]');
+                const phoneInput = document.querySelector('input[name="phone"]');
+                const activeSelect = document.querySelector('select[name="active"]');
+                
+                if (emailInput) emailInput.value = user.email || '';
+                if (phoneInput) phoneInput.value = user.phone || '';
+                if (activeSelect) activeSelect.value = user.active ? 'true' : 'false';
+                
+                // Password is optional for editing
+                const passwordField = document.getElementById('password');
+                if (passwordField) {
+                    passwordField.required = false;
+                    passwordField.value = '';
+                    passwordField.placeholder = 'Laisser vide pour ne pas modifier';
+                }
+                const passwordRequired = document.getElementById('passwordRequired');
+                if (passwordRequired) passwordRequired.classList.add('hidden');
+                
+                // Set role-specific fields based on user role
+                if (user.role === 'PATIENT') {
+                    const cinInput = document.querySelector('input[name="cin"]');
+                    const bloodTypeSelect = document.querySelector('select[name="bloodType"]');
+                    const birthDateInput = document.querySelector('input[name="birthDate"]');
+                    const genderSelect = document.querySelector('select[name="gender"]');
+                    const addressTextarea = document.querySelector('textarea[name="address"]');
+                    
+                    if (cinInput) cinInput.value = user.cin || '';
+                    if (bloodTypeSelect) bloodTypeSelect.value = user.bloodType || '';
+                    if (birthDateInput) birthDateInput.value = user.birthDate || '';
+                    if (genderSelect) genderSelect.value = user.gender || '';
+                    if (addressTextarea) addressTextarea.value = user.address || '';
+                } else if (user.role === 'DOCTOR') {
+                    const matriculeInput = document.querySelector('input[name="matricule"]');
+                    const titleInput = document.querySelector('input[name="title"]');
+                    const specialtySelect = document.querySelector('select[name="specialtyId"]');
+                    
+                    if (matriculeInput) matriculeInput.value = user.matricule || '';
+                    if (titleInput) titleInput.value = user.title || '';
+                    if (specialtySelect && user.specialtyId) specialtySelect.value = user.specialtyId;
+                } else if (user.role === 'STAFF') {
+                    const positionInput = document.querySelector('input[name="position"]');
+                    const employeeIdInput = document.querySelector('input[name="employeeId"]');
+                    
+                    if (positionInput) positionInput.value = user.position || '';
+                    if (employeeIdInput) employeeIdInput.value = user.employeeId || '';
+                }
+                
+                // Show modal
+                modal.classList.remove('hidden');
             },
 
             confirmDelete(userId, userName) {
@@ -948,7 +1035,21 @@
             },
 
             async deleteUser(userId) {
-                this.showToast('Fonction de suppression à implémenter', 'info');
+                try {
+                    const response = await fetch(this.state.contextPath + '/api/admin/users/' + userId, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        this.showToast('Utilisateur supprimé avec succès', 'success');
+                        this.loadUsers();
+                    } else {
+                        const data = await response.json();
+                        throw new Error(data.message || 'Failed to delete user');
+                    }
+                } catch (error) {
+                    this.showToast('Erreur: ' + error.message, 'error');
+                }
             },
 
             showLoading(show) {

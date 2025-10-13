@@ -10,6 +10,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Stateless
 public class UserService {
@@ -57,7 +58,37 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-      return   userRepository.findAll();
+        return userRepository.findAll();
+    }
+
+    public User getUserById(String id) {
+        try {
+            UUID userId = UUID.fromString(id);
+            return userRepository.findById(userId);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    @Transactional
+    public void updateUser(User user) {
+        if (user == null || user.getId() == null) {
+            throw new IllegalArgumentException("User or user ID cannot be null");
+        }
+        userRepository.update(user);
+    }
+
+    @Transactional
+    public void deleteUser(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            throw new IllegalArgumentException("User ID cannot be null or empty");
+        }
+        try {
+            UUID id = UUID.fromString(userId);
+            userRepository.delete(id);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid user ID format: " + userId);
+        }
     }
 
 }

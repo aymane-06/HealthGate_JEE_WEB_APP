@@ -2,14 +2,14 @@ package com.cliniqueDigitaleJEE.repository.Implementation;
 
 import com.cliniqueDigitaleJEE.model.Specialty;
 import com.cliniqueDigitaleJEE.repository.Interfaces.SpecialtyRepository;
-import jakarta.ejb.Singleton;
+import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import java.util.List;
 import java.util.UUID;
 
-@Singleton
+@Stateless
 public class SpecialtyRepositoryImpl implements SpecialtyRepository {
 
     @PersistenceContext
@@ -22,7 +22,8 @@ public class SpecialtyRepositoryImpl implements SpecialtyRepository {
 
     @Override
     public List<Specialty> findAll() {
-        return em.createQuery("SELECT s FROM Specialty s ORDER BY s.name", Specialty.class)
+        // Eagerly fetch doctors to avoid LazyInitializationException
+        return em.createQuery("SELECT DISTINCT s FROM Specialty s LEFT JOIN FETCH s.doctors ORDER BY s.name", Specialty.class)
                 .getResultList();
     }
 

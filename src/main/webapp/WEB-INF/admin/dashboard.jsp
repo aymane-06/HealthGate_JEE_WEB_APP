@@ -121,6 +121,12 @@
                         </a>
                     </li>
                     <li>
+                        <a href="${pageContext.request.contextPath}/admin/departments" class="flex items-center space-x-3 p-3 rounded-lg bg-primary-700/50 text-white">
+                            <i class="fas fa-building w-5"></i>
+                            <span class="font-medium">Départements</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="${pageContext.request.contextPath}/admin/appointments" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
                             <i class="fas fa-calendar-alt w-5"></i>
                             <span class="font-medium">Rendez-vous</span>
