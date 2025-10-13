@@ -28,8 +28,11 @@ public class AdminDepartmentApiServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
+
+
                 // Get all departments
                 List<Department> departments = departmentService.findAllDepartments();
+
                 String jsonResponse = buildDepartmentsJson(departments);
                 resp.getWriter().write(jsonResponse);
 

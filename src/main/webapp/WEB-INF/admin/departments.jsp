@@ -3,12 +3,82 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <style>
+        /* TomSelect custom theme to match Tailwind form */
+        .ts-wrapper {
+            border-radius: 0.5rem !important;
+            border: 1px solid #d1d5db !important; /* border-gray-300 */
+            background: #fff !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .ts-control {
+            min-height: 4.5rem !important; /* increased height */
+            padding: 0.5rem 1rem !important; /* px-4 py-3 */
+            border: none !important;
+            background: transparent !important;
+            color: #374151 !important; /* text-gray-700 */
+            font-size: 1rem !important;
+            border-radius: 0.5rem !important;
+            box-shadow: none !important;
+        }
+        .ts-control input {
+            color: #374151 !important;
+        }
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            border: 1px solid #d1d5db !important;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+            background: #fff !important;
+            color: #374151 !important;
+            font-size: 1rem !important;
+        }
+        .ts-dropdown .option {
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            transition: background 0.2s;
+        }
+        .ts-dropdown .option.active,
+        .ts-dropdown .option.selected,
+        .ts-dropdown .option:hover {
+            background: #f1f5f9 !important; /* bg-gray-100 */
+            color: #2563eb !important; /* text-primary-600 */
+        }
+        .ts-control .item {
+            background: #f1f5f9 !important; /* bg-gray-100 */
+            color: #2563eb !important; /* text-primary-600 */
+            border-radius: 0.375rem !important;
+            margin-right: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            font-weight: 500;
+        }
+        .ts-wrapper.focus .ts-control {
+            box-shadow: 0 0 0 2px #2563eb33 !important; /* focus:ring-primary-500 */
+            border-color: #2563eb !important;
+        }
+        .ts-control .remove {
+            color: #ef4444 !important; /* text-red-500 */
+            margin-left: 0.5rem;
+        }
+        .ts-dropdown .no-results {
+            color: #9ca3af !important; /* text-gray-400 */
+            padding: 0.5rem 1rem;
+        }
+        /* Increase height of specialties container */
+        #specialtiesContainer {
+            min-height: 90px;
+        }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Départements - Admin</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- TomSelect CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
@@ -34,6 +104,9 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- TomSelect JS -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -536,30 +609,61 @@
         },
 
         populateFormSelects() {
-            // Populate head doctors dropdown
+            // Populate head doctors dropdown with TomSelect
             const headDoctorSelect = document.querySelector('select[name="headDoctorId"]');
-            if (headDoctorSelect && this.state.doctors.length > 0) {
-                var optionsHtml = '<option value="">Sélectionner un responsable</option>';
-                for (var i = 0; i < this.state.doctors.length; i++) {
-                    var doctor = this.state.doctors[i];
-                    optionsHtml += '<option value="' + doctor.id + '">'+this.escapeHtml(doctor.title)+'.' + this.escapeHtml(doctor.Name)+'</option>';
+            if (headDoctorSelect) {
+                headDoctorSelect.innerHTML = '<option value="">Sélectionner un responsable</option>';
+                if (this.state.doctors.length > 0) {
+                    for (var i = 0; i < this.state.doctors.length; i++) {
+                        var doctor = this.state.doctors[i];
+                        headDoctorSelect.innerHTML += '<option value="' + doctor.id + '">' +
+                            this.escapeHtml(doctor.title) + '. ' + this.escapeHtml(doctor.Name) +
+                            '</option>';
+                    }
                 }
-                headDoctorSelect.innerHTML = optionsHtml;
+                if (headDoctorSelect.tomselect) headDoctorSelect.tomselect.destroy();
+                new TomSelect(headDoctorSelect, {
+                    create: false,
+                    sortField: { field: 'text', direction: 'asc' },
+                    placeholder: "Sélectionner un responsable"
+                });
             }
 
-            // Populate specialties checkboxes
+            // Populate specialties multi-select with TomSelect
+            let specialtiesSelect = document.querySelector('select[name="specialties"]');
             const specialtiesContainer = document.getElementById('specialtiesContainer');
-            if (specialtiesContainer && this.state.specialties.length > 0) {
-                var specialtiesHtml = '';
+            if (!specialtiesSelect) {
+                // If not present, create and insert it
+                specialtiesSelect = document.createElement('select');
+                specialtiesSelect.name = 'specialties';
+                specialtiesSelect.multiple = true;
+                specialtiesSelect.className = 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all';
+                specialtiesSelect.style.minHeight = '40px';
+                if (specialtiesContainer) {
+                    specialtiesContainer.innerHTML = '';
+                    specialtiesContainer.appendChild(specialtiesSelect);
+                }
+            } else {
+                specialtiesSelect.innerHTML = '';
+            }
+            if (this.state.specialties.length > 0) {
                 for (var i = 0; i < this.state.specialties.length; i++) {
                     var specialty = this.state.specialties[i];
-                    specialtiesHtml += '<label class="flex items-center space-x-2 mb-2">' +
-                        '<input type="checkbox" name="specialties" value="' + specialty.id + '" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">' +
-                        '<span class="text-sm text-gray-700">' + this.escapeHtml(specialty.name) + '</span>' +
-                        '</label>';
+                    var option = document.createElement('option');
+                    option.value = specialty.id;
+                    option.textContent = specialty.name;
+                    specialtiesSelect.appendChild(option);
                 }
-                specialtiesContainer.innerHTML = specialtiesHtml;
             }
+            if (specialtiesSelect.tomselect) specialtiesSelect.tomselect.destroy();
+            new TomSelect(specialtiesSelect, {
+                plugins: ['remove_button'],
+                placeholder: "Sélectionner les spécialités",
+                create: false,
+                maxOptions: 1000,
+                closeAfterSelect: false,
+                hideSelected: true
+            });
         },
 
         async loadDepartments() {
@@ -583,6 +687,7 @@
                 if (this.state.statusFilter) params.append('status', this.state.statusFilter);
 
                 const url = this.state.contextPath + '/api/admin/departments?' + params.toString();
+                console.log(url);
                 const response = await fetch(url, {
                     signal: this.state.abortController.signal
                 });
@@ -590,14 +695,12 @@
                 if (!response.ok) throw new Error('Failed to fetch departments');
 
                 const data = await response.json();
-
-                if (data.status === 'success') {
-                    console.log(data);
+                if (data.status === 'OK') {
                     this.state.totalElements = data.data.pagination.totalElements;
                     this.state.totalPages = data.data.pagination.totalPages;
                     this.state.departmentsCache = data.data.departments;
 
-                    this.renderDepartments(data.data.departments);
+                    this.renderDepartments(data.departments);
                     this.updateStats(data.data.stats);
                     this.renderPagination();
                     this.showToast('Départements chargés avec succès', 'success');
@@ -799,11 +902,13 @@
             document.querySelector('select[name="status"]').value = department.status || 'ACTIVE';
             document.querySelector('textarea[name="description"]').value = department.description || '';
 
-            // Check specialties
+            // Set specialties in TomSelect multi-select
             if (department.specialties) {
-                document.querySelectorAll('input[name="specialties"]').forEach(function(checkbox) {
-                    checkbox.checked = department.specialties.some(function(s) { return s.id === checkbox.value; });
-                });
+                const specialtiesSelect = document.querySelector('select[name="specialties"]');
+                if (specialtiesSelect && specialtiesSelect.tomselect) {
+                    const selectedIds = department.specialties.map(function(s) { return String(s.id); });
+                    specialtiesSelect.tomselect.setValue(selectedIds);
+                }
             }
         },
 

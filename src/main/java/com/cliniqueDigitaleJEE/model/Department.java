@@ -17,13 +17,15 @@ public class Department {
     private String name;
     @Column(nullable = true, columnDefinition = "TEXT")
     private String description;
+    @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean isActive;
     @OneToMany(mappedBy = "department")
     private List<Specialty> specialties;
     @OneToOne(
-            mappedBy = "responsibleDepartment",
             cascade = CascadeType.ALL,
             optional = true
     )
+    @JoinColumn(name = "doctor_id")
     private Doctor responsibleDoctor;
     @Column(nullable = true)
     private String location;

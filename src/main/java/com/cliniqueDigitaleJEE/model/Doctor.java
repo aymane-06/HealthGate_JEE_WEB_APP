@@ -16,9 +16,9 @@ public class Doctor extends User{
     private Specialty specialty;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<Availability> availabilities;
-    @OneToOne
-    @JoinColumn(name = "responsible_department_id")
+    @OneToOne(mappedBy = "responsibleDoctor")
     private Department responsibleDepartment;
+
 
     public Doctor() {}
 
@@ -58,11 +58,5 @@ public class Doctor extends User{
         this.specialty = specialty;
     }
 
-    public Department getResponsibleDepartment() {
-        return responsibleDepartment;
-    }
 
-    public void setResponsibleDepartment(Department responsibleDepartment) {
-        this.responsibleDepartment = responsibleDepartment;
-    }
 }
