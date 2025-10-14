@@ -2,12 +2,14 @@ package com.cliniqueDigitaleJEE.repository.Implementation;
 
 import com.cliniqueDigitaleJEE.model.Department;
 import com.cliniqueDigitaleJEE.repository.Interfaces.DepartmentRepository;
+import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import java.util.List;
 import java.util.UUID;
 
+@Stateless
 public class DepartmentRepoImpl implements DepartmentRepository {
 
     @PersistenceContext

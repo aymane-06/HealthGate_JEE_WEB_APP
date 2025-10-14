@@ -3,6 +3,7 @@ package com.cliniqueDigitaleJEE.model;
 import com.cliniqueDigitaleJEE.model.ENUMS.Role;
 import jakarta.persistence.*;
 
+import java.lang.ref.Reference;
 import java.util.List;
 @Entity
 @Table(name = "doctors")
@@ -16,7 +17,8 @@ public class Doctor extends User{
     private Specialty specialty;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<Availability> availabilities;
-    @OneToOne(mappedBy = "responsibleDoctor")
+
+    @OneToOne(mappedBy = "responsibleDoctor", fetch = FetchType.EAGER)
     private Department responsibleDepartment;
 
 
@@ -57,6 +59,15 @@ public class Doctor extends User{
     public void setSpecialty(Specialty specialty) {
         this.specialty = specialty;
     }
+    public Department getResponsibleDepartment() {
+        return responsibleDepartment;
+    }
+
+    public void setResponsibleDepartment(Department responsibleDepartment) {
+        this.responsibleDepartment = responsibleDepartment;
+    }
 
 
 }
+
+

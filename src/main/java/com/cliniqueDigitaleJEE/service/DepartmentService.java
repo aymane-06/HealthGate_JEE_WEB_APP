@@ -15,11 +15,18 @@ public class DepartmentService {
     private DepartmentRepository departmentRepository;
 
     public List<Department> findAllDepartments() {
-        return departmentRepository.findAll();
+        List<Department> departments = departmentRepository.findAll();
+        // Force initialization of specialties to avoid LazyInitializationException
+        for (Department d : departments) {
+            if (d.getSpecialties() != null) d.getSpecialties().size();
+        }
+        return departments;
     }
 
     public Department findById(UUID id) {
-        return departmentRepository.findById(id);
+        Department d = departmentRepository.findById(id);
+        if (d != null && d.getSpecialties() != null) d.getSpecialties().size();
+        return d;
     }
 
     public void save(Department department) {

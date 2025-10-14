@@ -696,11 +696,14 @@
 
                 const data = await response.json();
                 if (data.status === 'OK') {
+                    console.log(data);
                     this.state.totalElements = data.data.pagination.totalElements;
                     this.state.totalPages = data.data.pagination.totalPages;
+                    this.state.currentPage= data.data.pagination.currentPage;
+                    this.state.pageSize=data.data.pagination.pageSize;
                     this.state.departmentsCache = data.data.departments;
 
-                    this.renderDepartments(data.departments);
+                    this.renderDepartments(data.data.departments);
                     this.updateStats(data.data.stats);
                     this.renderPagination();
                     this.showToast('Départements chargés avec succès', 'success');
@@ -718,6 +721,7 @@
         },
 
         renderDepartments(departments) {
+            console.log(departments)
 
             const cardView = document.getElementById('cardView');
             const listViewBody = document.getElementById('listViewBody');
@@ -754,10 +758,10 @@
 
         createDepartmentCard(department) {
             const colorClass = this.getColorClass(department.color);
-            const statusClass = department.status === 'ACTIVE'
+            const statusClass = department.isActive
                 ? 'bg-green-100 text-green-800'
                 : 'bg-red-100 text-red-800';
-            const statusText = department.status === 'ACTIVE' ? 'Actif' : 'Inactif';
+            const statusText = department.isActive  ? 'Actif' : 'Inactif';
             const staffCount = department.staffCount || 0;
             const specialtiesCount = department.specialtiesCount || 0;
             const phone = department.phone || 'N/A';
@@ -883,23 +887,32 @@
         },
 
         async editDepartment(departmentId) {
+
             const department = this.state.departmentsCache.find(function(d) { return d.id === departmentId; });
             if (!department) {
                 this.showToast('Département non trouvé', 'error');
                 return;
             }
-
+            console.log(department);
             this.openModal('Modifier le Département');
 
             // Populate form
             document.getElementById('departmentId').value = department.id;
+
             document.querySelector('input[name="code"]').value = department.code || '';
             document.querySelector('input[name="name"]').value = department.name || '';
-            document.querySelector('select[name="headDoctorId"]').value = department.headDoctorId || '';
+            const headDoctorSelect= document.querySelector('select[name="headDoctorId"]');
+            if (headDoctorSelect && headDoctorSelect.tomselect) {
+                console.log(department.responsibleDoctor);
+                headDoctorSelect.tomselect.setValue(department.responsibleDoctor.id);
+
+            }
+
             document.querySelector('input[name="phone"]').value = department.phone || '';
             document.querySelector('input[name="location"]').value = department.location || '';
             document.querySelector('select[name="color"]').value = department.color || 'blue';
-            document.querySelector('select[name="status"]').value = department.status || 'ACTIVE';
+            document.querySelector('input[name="phone"]').value = department.contactInfo || '';
+            document.querySelector('select[name="status"]').value = department.status ? 'ACTIVE':'INACTIVE' ;
             document.querySelector('textarea[name="description"]').value = department.description || '';
 
             // Set specialties in TomSelect multi-select
@@ -949,6 +962,7 @@
             const formData = new FormData(e.target);
             const departmentId = document.getElementById('departmentId').value;
 
+
             const method = departmentId ? 'PUT' : 'POST';
             const url = departmentId
                 ? this.state.contextPath + '/api/admin/departments/' + departmentId
@@ -959,13 +973,14 @@
                 code: formData.get('code'),
                 name: formData.get('name'),
                 headDoctorId: formData.get('headDoctorId') || null,
-                phone: formData.get('phone'),
+                contactInfo: formData.get('phone'),
                 location: formData.get('location'),
                 color: formData.get('color'),
-                status: formData.get('status'),
+                isActive: formData.get('status') === 'ACTIVE',
                 description: formData.get('description'),
-                specialties: Array.from(formData.getAll('specialties')).map(function(id) { return { id: id }; })
+                specialties: Array.from(formData.getAll('specialties'))
             };
+            console.log(data);
 
             try {
                 const response = await fetch(url, {
@@ -1004,6 +1019,18 @@
 
         openAddModal() {
             this.openModal('Nouveau Département');
+            // Reset form
+            document.getElementById('departmentForm').reset();
+            document.getElementById('departmentId').value = '';
+            // Reset TomSelect fields
+            const headDoctorSelect = document.querySelector('select[name="headDoctorId"]');
+            if (headDoctorSelect && headDoctorSelect.tomselect) {
+                headDoctorSelect.tomselect.clear();
+            }
+            const specialtiesSelect = document.querySelector('select[name="specialties"]');
+            if (specialtiesSelect && specialtiesSelect.tomselect) {
+                specialtiesSelect.tomselect.clear();
+            }
         },
 
         toggleView() {

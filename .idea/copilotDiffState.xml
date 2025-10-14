@@ -19,6 +19,15 @@
             </PendingDiffInfo>
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/main/java/com/cliniqueDigitaleJEE/service/DepartmentService.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/src/main/java/com/cliniqueDigitaleJEE/service/DepartmentService.java" />
+              <option name="originalContent" value="package com.cliniqueDigitaleJEE.service;&#10;&#10;import com.cliniqueDigitaleJEE.model.Department;&#10;import com.cliniqueDigitaleJEE.repository.Interfaces.DepartmentRepository;&#10;import jakarta.ejb.Stateless;&#10;import jakarta.inject.Inject;&#10;&#10;import java.util.List;&#10;import java.util.UUID;&#10;&#10;@Stateless&#10;public class DepartmentService {&#10;&#10;    @Inject&#10;    private DepartmentRepository departmentRepository;&#10;&#10;    public List&lt;Department&gt; findAllDepartments() {&#10;        return departmentRepository.findAll();&#10;    }&#10;&#10;    public Department findById(UUID id) {&#10;        return departmentRepository.findById(id);&#10;    }&#10;&#10;    public void save(Department department) {&#10;        departmentRepository.save(department);&#10;    }&#10;&#10;    public void update(Department department) {&#10;        departmentRepository.update(department);&#10;    }&#10;&#10;    public void delete(UUID id) {&#10;        departmentRepository.delete(id);&#10;    }&#10;}&#10;" />
+              <option name="updatedContent" value="package com.cliniqueDigitaleJEE.service;&#10;&#10;import com.cliniqueDigitaleJEE.model.Department;&#10;import com.cliniqueDigitaleJEE.repository.Interfaces.DepartmentRepository;&#10;import jakarta.ejb.Stateless;&#10;import jakarta.inject.Inject;&#10;&#10;import java.util.List;&#10;import java.util.UUID;&#10;&#10;@Stateless&#10;public class DepartmentService {&#10;&#10;    @Inject&#10;    private DepartmentRepository departmentRepository;&#10;&#10;    public List&lt;Department&gt; findAllDepartments() {&#10;        List&lt;Department&gt; departments = departmentRepository.findAll();&#10;        // Force initialization of specialties to avoid LazyInitializationException&#10;        for (Department d : departments) {&#10;            if (d.getSpecialties() != null) d.getSpecialties().size();&#10;        }&#10;        return departments;&#10;    }&#10;&#10;    public Department findById(UUID id) {&#10;        Department d = departmentRepository.findById(id);&#10;        if (d != null &amp;&amp; d.getSpecialties() != null) d.getSpecialties().size();&#10;        return d;&#10;    }&#10;&#10;    public void save(Department department) {&#10;        departmentRepository.save(department);&#10;    }&#10;&#10;    public void update(Department department) {&#10;        departmentRepository.update(department);&#10;    }&#10;&#10;    public void delete(UUID id) {&#10;        departmentRepository.delete(id);&#10;    }&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
       </map>
     </option>
   </component>

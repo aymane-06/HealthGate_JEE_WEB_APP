@@ -30,6 +30,7 @@ public class AdminDoctorsApiServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 // Get all doctors
                 List<Doctor> doctors = doctorService.findAllDoctors();
+//doctors=doctors.stream().filter(d->d.getResponsibleDepartment()==null).toList();
                 String jsonResponse = buildDoctorsJson(doctors);
                 resp.getWriter().write(jsonResponse);
 
