@@ -117,7 +117,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="${pageContext.request.contextPath}/admin/departments" class="flex items-center space-x-3 p-3 rounded-lg bg-primary-700/50 text-white">
+                        <a href="${pageContext.request.contextPath}/admin/departments" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-700/30 transition-colors text-primary-100 hover:text-white">
                             <i class="fas fa-building w-5"></i>
                             <span class="font-medium">Départements</span>
                         </a>
@@ -236,141 +236,7 @@
                 <!-- Card View (Default) -->
                 <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     
-                    <!-- Specialty Card 1 -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">
-                        <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 text-white">
-                            <div class="flex items-center justify-between">
-                                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-heartbeat text-3xl"></i>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-4xl font-bold">8</p>
-                                    <p class="text-red-100 text-sm">Médecins</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">Cardiologie</h3>
-                            <p class="text-sm text-gray-600 mb-4">Spécialité médicale qui s'intéresse au cœur et aux vaisseaux sanguins.</p>
-                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                <span><i class="fas fa-calendar-alt mr-2 text-primary-600"></i>125 RDV/mois</span>
-                                <span><i class="fas fa-star mr-2 text-yellow-500"></i>4.8/5</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="viewSpecialty(1)" class="flex-1 px-4 py-2 bg-primary-50 text-primary-600 rounded-lg font-semibold hover:bg-primary-100 transition-colors">
-                                    <i class="fas fa-eye mr-2"></i>Voir
-                                </button>
-                                <button onclick="editSpecialty(1)" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold hover:bg-blue-100 transition-colors">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="deleteSpecialty(1)" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Specialty Card 2 -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">
-                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white">
-                            <div class="flex items-center justify-between">
-                                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-brain text-3xl"></i>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-4xl font-bold">5</p>
-                                    <p class="text-purple-100 text-sm">Médecins</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">Neurologie</h3>
-                            <p class="text-sm text-gray-600 mb-4">Spécialité qui traite les maladies du système nerveux.</p>
-                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                <span><i class="fas fa-calendar-alt mr-2 text-primary-600"></i>87 RDV/mois</span>
-                                <span><i class="fas fa-star mr-2 text-yellow-500"></i>4.9/5</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="viewSpecialty(2)" class="flex-1 px-4 py-2 bg-primary-50 text-primary-600 rounded-lg font-semibold hover:bg-primary-100 transition-colors">
-                                    <i class="fas fa-eye mr-2"></i>Voir
-                                </button>
-                                <button onclick="editSpecialty(2)" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold hover:bg-blue-100 transition-colors">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="deleteSpecialty(2)" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Specialty Card 3 -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">
-                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white">
-                            <div class="flex items-center justify-between">
-                                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-bone text-3xl"></i>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-4xl font-bold">6</p>
-                                    <p class="text-blue-100 text-sm">Médecins</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">Orthopédie</h3>
-                            <p class="text-sm text-gray-600 mb-4">Spécialité chirurgicale qui traite les maladies de l'appareil locomoteur.</p>
-                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                <span><i class="fas fa-calendar-alt mr-2 text-primary-600"></i>93 RDV/mois</span>
-                                <span><i class="fas fa-star mr-2 text-yellow-500"></i>4.7/5</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="viewSpecialty(3)" class="flex-1 px-4 py-2 bg-primary-50 text-primary-600 rounded-lg font-semibold hover:bg-primary-100 transition-colors">
-                                    <i class="fas fa-eye mr-2"></i>Voir
-                                </button>
-                                <button onclick="editSpecialty(3)" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold hover:bg-blue-100 transition-colors">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="deleteSpecialty(3)" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Specialty Card 4 -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">
-                        <div class="bg-gradient-to-br from-pink-500 to-pink-600 p-6 text-white">
-                            <div class="flex items-center justify-between">
-                                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-baby text-3xl"></i>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-4xl font-bold">7</p>
-                                    <p class="text-pink-100 text-sm">Médecins</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">Pédiatrie</h3>
-                            <p class="text-sm text-gray-600 mb-4">Spécialité médicale dédiée aux nourrissons, enfants et adolescents.</p>
-                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                <span><i class="fas fa-calendar-alt mr-2 text-primary-600"></i>110 RDV/mois</span>
-                                <span><i class="fas fa-star mr-2 text-yellow-500"></i>4.9/5</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="viewSpecialty(4)" class="flex-1 px-4 py-2 bg-primary-50 text-primary-600 rounded-lg font-semibold hover:bg-primary-100 transition-colors">
-                                    <i class="fas fa-eye mr-2"></i>Voir
-                                </button>
-                                <button onclick="editSpecialty(4)" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold hover:bg-blue-100 transition-colors">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="deleteSpecialty(4)" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+
                     
                     <!-- More specialty cards... -->
                     
@@ -389,40 +255,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center text-white mr-3">
-                                            <i class="fas fa-heartbeat"></i>
-                                        </div>
-                                        <div>
-                                            <div class="font-semibold text-gray-900">Cardiologie</div>
-                                            <div class="text-sm text-gray-500">Maladies du cœur</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700">8 médecins</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">125</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-star text-yellow-500 mr-1"></i>
-                                        <span class="font-semibold text-gray-900">4.8/5</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                                    <button onclick="viewSpecialty(1)" class="text-blue-600 hover:text-blue-700 font-semibold">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button onclick="editSpecialty(1)" class="text-primary-600 hover:text-primary-700 font-semibold">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button onclick="deleteSpecialty(1)" class="text-red-600 hover:text-red-700 font-semibold">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
+
                             <!-- More rows... -->
                         </tbody>
                     </table>
@@ -541,7 +374,7 @@
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                                     <i class="fas fa-toggle-on text-primary-600 mr-2"></i>Statut
                                 </label>
-                                <select name="active" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                                <select name="isActive" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
                                     <option value="true">Active</option>
                                     <option value="false">Inactive</option>
                                 </select>
@@ -562,7 +395,7 @@
             </div>
         </div>
     </div>
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // ============================================
         // Specialty Management System
@@ -631,6 +464,7 @@
 
                     const data = await response.json();
                     if (data.status === 'success') {
+                        console.log(data);
                         this.state.totalElements = data.data.pagination.totalElements;
                         this.state.totalPages = data.data.pagination.totalPages;
                         this.state.specialtiesCache = data.data.specialties; // Store specialties in cache
@@ -650,48 +484,102 @@
             },
 
             renderSpecialties(specialties) {
-                console.log(specialties)
+
                 const cardView = document.getElementById('cardView');
                 if (!specialties || specialties.length === 0) {
                     cardView.innerHTML = '<div class="col-span-full text-center py-12"><i class="fas fa-inbox text-5xl text-gray-400 mb-4"></i><p class="text-gray-600">Aucune spécialité trouvée</p></div>';
                     return;
                 }
 
-                cardView.innerHTML = specialties.map(specialty => {
-                    const specialtyId = this.escapeHtml(specialty.id);
-                    const specialtyName = this.escapeHtml(specialty.name);
-                    const specialtyCode = this.escapeHtml(specialty.code);
-                    const specialtyDesc = this.escapeHtml(specialty.description || 'Aucune description');
-                    const doctorsCount = specialty.doctorsCount || 0;
-                    
-                    return `<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">
-                        <div class="bg-gradient-to-br from-primary-500 to-primary-600 p-6 text-white">
-                            <div class="flex items-center justify-between">
-                                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-stethoscope text-3xl"></i>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-4xl font-bold">${doctorsCount}</p>
-                                    <p class="text-primary-100 text-sm">Médecins</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">${specialtyName}</h3>
-                            <p class="text-sm text-gray-600 mb-2"><strong>Code:</strong> ${specialtyCode}</p>
-                            <p class="text-sm text-gray-600 mb-4">${specialtyDesc}</p>
-                            <div class="flex items-center space-x-2">
-                                <button data-specialty-id="${specialtyId}" class="edit-specialty-btn flex-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold hover:bg-blue-100 transition-colors">
-                                    <i class="fas fa-edit mr-2"></i>Modifier
-                                </button>
-                                <button data-specialty-id="${specialtyId}" data-specialty-name="${specialtyName}" class="delete-specialty-btn px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
+                cardView.innerHTML = specialties.map(function(specialty) {
+                    var specialtyId = specialtyManager.escapeHtml(specialty.id);
+                    var specialtyName = specialtyManager.escapeHtml(specialty.name);
+                    var specialtyCode = specialtyManager.escapeHtml(specialty.code);
+                    var specialtyDesc = specialtyManager.escapeHtml(specialty.description || 'Aucune description');
+                    var doctorsCount = specialty.doctorsCount || 0;
+                    var color = specialty.color || 'primary';
+                    var icon = specialty.icon || 'fa-stethoscope';
+                    var colorFrom = 'from-' + color + '-500';
+                    var colorTo = 'to-' + color + '-600';
+
+                    return '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">' +
+                        '<div class="bg-gradient-to-br ' + colorFrom + ' ' + colorTo + ' p-6 text-white">' +
+                        '<div class="flex items-center justify-between">' +
+                        '<div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">' +
+                        '<i class="fas ' + icon + ' text-3xl"></i>' +
+                        '</div>' +
+                        '<div class="text-right">' +
+                        '<p class="text-4xl font-bold">' + doctorsCount + '</p>' +
+                        '<p class="text-primary-100 text-sm">Médecins</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="p-6">' +
+                        '<h3 class="text-xl font-bold text-gray-900 mb-2">' + specialtyName + '</h3>' +
+                        '<p class="text-sm text-gray-600 mb-2"><strong>Code:</strong> ' + specialtyCode + '</p>' +
+                        '<p class="text-sm text-gray-600 mb-4">' + specialtyDesc + '</p>' +
+                        '<div class="flex items-center space-x-2">' +
+                        '<button data-specialty-id="' + specialtyId + '" class="edit-specialty-btn flex-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold hover:bg-blue-100 transition-colors">' +
+                        '<i class="fas fa-edit mr-2"></i>Modifier' +
+                        '</button>' +
+                        '<button data-specialty-id="' + specialtyId + '" data-specialty-name="' + specialtyName + '" class="delete-specialty-btn px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">' +
+                        '<i class="fas fa-trash"></i>' +
+                        '</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
                 }).join('');
 
+                this.attachEventListeners();
+            },
+
+            renderListView(specialties) {
+                const listView = document.getElementById('listView');
+                const tbody = listView.querySelector('tbody');
+                if (!specialties || specialties.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">Aucune spécialité trouvée</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = specialties.map(specialty => {
+                    var specialtyId = this.escapeHtml(specialty.id);
+                    var specialtyName = this.escapeHtml(specialty.name);
+                    var specialtyCode = this.escapeHtml(specialty.code);
+                    var specialtyDesc = this.escapeHtml(specialty.description || '');
+                    var doctorsCount = specialty.doctorsCount || 0;
+                    var icon = specialty.icon || 'fa-stethoscope';
+                    var color = specialty.color || 'primary';
+                    var colorClass = 'text-' + color + '-500';
+                    var satisfaction = specialty.satisfaction ? specialty.satisfaction : 'N/A';
+                    var rdv = specialty.rdv ? specialty.rdv : 'N/A';
+                    return '<tr class="hover:bg-gray-50 transition-colors">' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' +
+                            '<div class="flex items-center">' +
+                                '<div class="w-10 h-10 bg-gradient-to-br from-' + color + '-500 to-' + color + '-600 rounded-lg flex items-center justify-center text-white mr-3">' +
+                                    '<i class="fas ' + icon + '"></i>' +
+                                '</div>' +
+                                '<div>' +
+                                    '<div class="font-semibold text-gray-900">' + specialtyName + '</div>' +
+                                    '<div class="text-sm text-gray-500">' + specialtyDesc + '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' +
+                            '<span class="px-3 py-1 text-xs font-bold rounded-full bg-' + color + '-100 text-' + color + '-700">' + doctorsCount + ' médecins</span>' +
+                        '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">' + (specialty.rdvPerMonth || 'N/A') + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' +
+                            '<div class="flex items-center">' +
+                                '<i class="fas fa-star text-yellow-500 mr-1"></i>' +
+                                '<span class="font-semibold text-gray-900">' + (specialty.satisfaction || 'N/A') + '</span>' +
+                            '</div>' +
+                        '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">' +
+                            '<button data-specialty-id="' + specialtyId + '" class="edit-specialty-btn text-primary-600 hover:text-primary-700 font-semibold"><i class="fas fa-edit"></i></button>' +
+                            '<button data-specialty-id="' + specialtyId + '" data-specialty-name="' + specialtyName + '" class="delete-specialty-btn text-red-600 hover:text-red-700 font-semibold"><i class="fas fa-trash"></i></button>' +
+                        '</td>' +
+                    '</tr>';
+                }).join('');
                 this.attachEventListeners();
             },
 
@@ -744,10 +632,22 @@
             },
 
             confirmDelete(specialtyId, specialtyName) {
-                if (confirm(`Êtes-vous sûr de vouloir supprimer la spécialité "${specialtyName}" ? Cette action est irréversible.`)) {
-                    this.deleteSpecialty(specialtyId);
-                }
+                Swal.fire({
+                    title: 'Êtes-vous sûr ?',
+                    text: 'Voulez-vous supprimer la spécialité "' + specialtyName + '" ? Cette action est irréversible.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Oui, supprimer',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.deleteSpecialty(specialtyId);
+                    }
+                });
             },
+
 
             async deleteSpecialty(specialtyId) {
                 try {
@@ -811,18 +711,49 @@
             document.getElementById('specialtyModal').classList.add('hidden');
         }
         
+        // Toggle view function
+        function toggleView() {
+            const cardView = document.getElementById('cardView');
+            const listView = document.getElementById('listView');
+            const viewText = document.getElementById('viewText');
+            if (cardView.classList.contains('hidden')) {
+                cardView.classList.remove('hidden');
+                listView.classList.add('hidden');
+                if (viewText) viewText.textContent = 'Vue liste';
+            } else {
+                cardView.classList.add('hidden');
+                listView.classList.remove('hidden');
+                if (viewText) viewText.textContent = 'Vue cartes';
+                // Populate list view when shown
+                specialtyManager.renderListView(specialtyManager.state.specialtiesCache);
+            }
+        }
+
         // Form submission handler
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('specialtyForm');
             if (form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    let fomeData = new FormData(form);
+                    let specialtyId = document.getElementById('specialtyId').value;
+                    let url = '${pageContext.request.contextPath}/admin/specialties';
+
                     
-                    const formData = new FormData(this);
+                    let data={
+                        code: fomeData.get('code'),
+                        name: fomeData.get('name'),
+                        description: fomeData.get('description'),
+                        icon: fomeData.get('icon'),
+                        color: fomeData.get('color'),
+                        isActive: fomeData.get('isActive')
+                    }
+                    console.log(data)
+
                     
-                    fetch("${pageContext.request.contextPath}/admin/specialties", {
+                    fetch(url, {
                         method: 'POST',
-                        body: formData
+                        body: fomeData
                     })
                     .then(response => response.json())
                     .then(data => {

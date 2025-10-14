@@ -1,6 +1,8 @@
 package com.cliniqueDigitaleJEE.model;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,8 +21,14 @@ public class Specialty {
     @ManyToOne
     @JoinColumn(name = "department_id", nullable = true)
     private Department department;
-    @OneToMany(mappedBy = "specialty")
+    @OneToMany(mappedBy = "specialty",fetch = FetchType.EAGER)
     private List<Doctor> doctors;
+    private String color;
+    @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean isActive;
+    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private java.time.LocalDateTime createdAt;
+    private String icon;
 
     public Specialty() {}
 
@@ -30,6 +38,8 @@ public class Specialty {
         this.description = description;
         this.department = department;
     }
+
+
 
     public UUID getId() {
         return id;
@@ -77,5 +87,37 @@ public class Specialty {
 
     public void setDoctors(List<Doctor> doctors) {
         this.doctors = doctors;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 }

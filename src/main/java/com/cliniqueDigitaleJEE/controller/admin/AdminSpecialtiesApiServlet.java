@@ -191,7 +191,11 @@ public class AdminSpecialtiesApiServlet extends HttpServlet {
         json.append("\"description\":\"").append(specialty.getDescription() != null ? escapeJson(specialty.getDescription()) : "").append("\",");
         json.append("\"departmentId\":\"").append(specialty.getDepartment() != null ? specialty.getDepartment().getId() : "").append("\",");
         json.append("\"departmentName\":\"").append(specialty.getDepartment() != null ? escapeJson(specialty.getDepartment().getName()) : "").append("\",");
-        json.append("\"doctorsCount\":").append(specialty.getDoctors() != null ? specialty.getDoctors().size() : 0);
+        json.append("\"doctorsCount\":").append(specialty.getDoctors() != null ? specialty.getDoctors().size() : 0).append(",");
+        json.append("\"color\":\"").append(specialty.getColor() != null ? escapeJson(specialty.getColor()) : "").append("\",");
+        json.append("\"isActive\":").append(specialty.isActive()).append(",");
+        json.append("\"createdAt\":\"").append(specialty.getCreatedAt() != null ? specialty.getCreatedAt().toString() : "").append("\",");
+        json.append("\"icon\":\"").append(specialty.getIcon() != null ? escapeJson(specialty.getIcon()) : "").append("\"");
         json.append("}");
         return json.toString();
     }

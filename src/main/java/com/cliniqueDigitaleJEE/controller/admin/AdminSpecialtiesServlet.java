@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -46,7 +47,11 @@ public class AdminSpecialtiesServlet extends HttpServlet {
         String code = req.getParameter("code");
         String name = req.getParameter("name");
         String description = req.getParameter("description");
-        
+        String icon = req.getParameter("icon");
+        String color = req.getParameter("color");
+        String IsActiveParam = req.getParameter("isActive");
+        boolean isActive = Boolean.parseBoolean(IsActiveParam);
+
         
         
         // Validate required fields
@@ -80,6 +85,9 @@ public class AdminSpecialtiesServlet extends HttpServlet {
                 specialty.setCode(code);
                 specialty.setName(name);
                 specialty.setDescription(description);
+                specialty.setIcon(icon);
+                specialty.setColor(color);
+                specialty.setActive(isActive);
                 specialtyService.update(specialty);
                 
                 String jsonResponse = String.format(
@@ -90,7 +98,14 @@ public class AdminSpecialtiesServlet extends HttpServlet {
                 resp.getWriter().write(jsonResponse);
             } else {
                 // Create new specialty
-                specialty = new Specialty(code, name, description, null);
+                specialty = new Specialty();
+                specialty.setCode(code);
+                specialty.setName(name);
+                specialty.setDescription(description);
+                specialty.setIcon(icon);
+                specialty.setColor(color);
+                specialty.setActive(isActive);
+                specialty.setCreatedAt(LocalDate.now().atStartOfDay());
                 specialtyService.save(specialty);
                 
                 String jsonResponse = String.format(
