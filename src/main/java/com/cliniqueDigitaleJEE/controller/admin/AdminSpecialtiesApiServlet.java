@@ -64,7 +64,9 @@ public class AdminSpecialtiesApiServlet extends HttpServlet {
             // Fetch all specialties
             List<Specialty> allSpecialties = specialtyService.findAllSpecialties();
 
-            // Apply search filter
+
+
+             // Apply search filter
             if (search != null && !search.trim().isEmpty()) {
                 String searchLower = search.toLowerCase().trim();
                 allSpecialties = allSpecialties.stream()
@@ -183,14 +185,29 @@ public class AdminSpecialtiesApiServlet extends HttpServlet {
         }
     }
 
+    private String buildDepartmentJson(com.cliniqueDigitaleJEE.model.Department department) {
+        if (department == null) return "null";
+        StringBuilder json = new StringBuilder("{");
+        json.append("\"id\":\"").append(escapeJson(department.getId().toString())).append("\",");
+        json.append("\"code\":\"").append(escapeJson(department.getCode())).append("\",");
+        json.append("\"name\":\"").append(escapeJson(department.getName())).append("\",");
+        json.append("\"description\":\"").append(department.getDescription() != null ? escapeJson(department.getDescription()) : "").append("\",");
+        json.append("\"isActive\":").append(department.isActive()).append(",");
+        json.append("\"location\":\"").append(department.getLocation() != null ? escapeJson(department.getLocation()) : "").append("\",");
+        json.append("\"contactInfo\":\"").append(department.getContactInfo() != null ? escapeJson(department.getContactInfo()) : "").append("\",");
+        json.append("\"color\":\"").append(department.getColor() != null ? escapeJson(department.getColor()) : "").append("\",");
+        json.append("\"createdAt\":\"").append(department.getCreatedAt() != null ? department.getCreatedAt().toString() : "").append("\"");
+        json.append("}");
+        return json.toString();
+    }
+
     private String buildSpecialtyJson(Specialty specialty) {
         StringBuilder json = new StringBuilder("{");
         json.append("\"id\":\"").append(escapeJson(specialty.getId().toString())).append("\",");
         json.append("\"code\":\"").append(escapeJson(specialty.getCode())).append("\",");
         json.append("\"name\":\"").append(escapeJson(specialty.getName())).append("\",");
         json.append("\"description\":\"").append(specialty.getDescription() != null ? escapeJson(specialty.getDescription()) : "").append("\",");
-        json.append("\"departmentId\":\"").append(specialty.getDepartment() != null ? specialty.getDepartment().getId() : "").append("\",");
-        json.append("\"departmentName\":\"").append(specialty.getDepartment() != null ? escapeJson(specialty.getDepartment().getName()) : "").append("\",");
+        json.append("\"department\":").append(specialty.getDepartment() != null ? buildDepartmentJson(specialty.getDepartment()) : "null").append(",");
         json.append("\"doctorsCount\":").append(specialty.getDoctors() != null ? specialty.getDoctors().size() : 0).append(",");
         json.append("\"color\":\"").append(specialty.getColor() != null ? escapeJson(specialty.getColor()) : "").append("\",");
         json.append("\"isActive\":").append(specialty.isActive()).append(",");

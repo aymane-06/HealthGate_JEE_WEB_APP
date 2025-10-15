@@ -1,10 +1,8 @@
 package com.cliniqueDigitaleJEE.controller.admin;
 
-import com.cliniqueDigitaleJEE.model.Doctor;
+import com.cliniqueDigitaleJEE.model.*;
 import com.cliniqueDigitaleJEE.model.ENUMS.Gender;
-import com.cliniqueDigitaleJEE.model.Patient;
-import com.cliniqueDigitaleJEE.model.STAFF;
-import com.cliniqueDigitaleJEE.model.User;
+import com.cliniqueDigitaleJEE.service.SpecialtyService;
 import com.cliniqueDigitaleJEE.service.UserService;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
@@ -18,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -28,12 +27,18 @@ import java.util.List;
 public class AdminUsersServlet extends HttpServlet {
 
     @Inject
+    private SpecialtyService specialtyService;
+
+    @Inject
      private UserService userService;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         
-        
+        List<Specialty> specialties = specialtyService.findAllSpecialties();
+
+
+        req.setAttribute("specialties", specialties);
 
         req.getRequestDispatcher("/WEB-INF/admin/users.jsp").forward(req, resp);
     }
@@ -55,6 +60,8 @@ public class AdminUsersServlet extends HttpServlet {
         String password = req.getParameter("password");
         String active = req.getParameter("active");
 
+
+        System.out.println("====================================================");
         System.out.println("Operation: " + (isUpdate ? "UPDATE" : "CREATE"));
         System.out.println("User ID: " + userId);
         System.out.println("Extracted values:");
@@ -65,6 +72,7 @@ public class AdminUsersServlet extends HttpServlet {
         System.out.println("  Phone: " + phone);
         System.out.println("  Password: " + (password != null && !password.isEmpty() ? "[HIDDEN]" : "null"));
         System.out.println("  Active: " + active);
+        System.out.println("====================================================");
 
         String name = firstName + " " + lastName;
 
@@ -146,6 +154,7 @@ public class AdminUsersServlet extends HttpServlet {
             String matricule = req.getParameter("matricule");
             String title = req.getParameter("title");
             String specialtyId = req.getParameter("specialtyId");
+            Specialty specialty = (specialtyId != null && !specialtyId.trim().isEmpty()) ? specialtyService.findById(UUID.fromString(specialtyId)) : null;
 
             try {
                 Doctor doctor;
@@ -156,6 +165,7 @@ public class AdminUsersServlet extends HttpServlet {
                     doctor.setEmail(email);
                     doctor.setMatricule(matricule);
                     doctor.setTitle(title);
+                    doctor.setSpecialty(specialty);
                     doctor.setActive("true".equals(active));
                     
                     // Only update password if provided
@@ -174,6 +184,7 @@ public class AdminUsersServlet extends HttpServlet {
                 } else {
                     // Create new doctor
                     doctor = new Doctor(name, email, password, matricule, title);
+                    doctor.setSpecialty(specialty);
                     userService.registerUser(doctor);
                     
                     String jsonResponse = String.format(

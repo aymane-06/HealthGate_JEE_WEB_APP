@@ -246,13 +246,15 @@
                 <div id="listView" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <table class="w-full">
                         <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Spécialité</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Médecins</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">RDV/Mois</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Satisfaction</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
-                            </tr>
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Spécialité</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Département</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Médecins</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">RDV/Mois</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Satisfaction</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                        </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
 
@@ -484,7 +486,6 @@
             },
 
             renderSpecialties(specialties) {
-
                 const cardView = document.getElementById('cardView');
                 if (!specialties || specialties.length === 0) {
                     cardView.innerHTML = '<div class="col-span-full text-center py-12"><i class="fas fa-inbox text-5xl text-gray-400 mb-4"></i><p class="text-gray-600">Aucune spécialité trouvée</p></div>';
@@ -502,6 +503,14 @@
                     var colorFrom = 'from-' + color + '-500';
                     var colorTo = 'to-' + color + '-600';
 
+                    // Department information
+                    var departmentName = 'Non assigné';
+                    var departmentCode = '-';
+                    if (specialty.department) {
+                        departmentName = specialtyManager.escapeHtml(specialty.department.name || 'Non assigné');
+                        departmentCode = specialtyManager.escapeHtml(specialty.department.code || '-');
+                    }
+
                     return '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">' +
                         '<div class="bg-gradient-to-br ' + colorFrom + ' ' + colorTo + ' p-6 text-white">' +
                         '<div class="flex items-center justify-between">' +
@@ -517,6 +526,7 @@
                         '<div class="p-6">' +
                         '<h3 class="text-xl font-bold text-gray-900 mb-2">' + specialtyName + '</h3>' +
                         '<p class="text-sm text-gray-600 mb-2"><strong>Code:</strong> ' + specialtyCode + '</p>' +
+                        '<p class="text-sm text-gray-600 mb-2"><strong>Département:</strong> ' + departmentName + ' (' + departmentCode + ')</p>' +
                         '<p class="text-sm text-gray-600 mb-4">' + specialtyDesc + '</p>' +
                         '<div class="flex items-center space-x-2">' +
                         '<button data-specialty-id="' + specialtyId + '" class="edit-specialty-btn flex-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold hover:bg-blue-100 transition-colors">' +
@@ -538,7 +548,7 @@
                 const listView = document.getElementById('listView');
                 const tbody = listView.querySelector('tbody');
                 if (!specialties || specialties.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">Aucune spécialité trouvée</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">Aucune spécialité trouvée</td></tr>';
                     return;
                 }
                 tbody.innerHTML = specialties.map(specialty => {
@@ -552,33 +562,44 @@
                     var colorClass = 'text-' + color + '-500';
                     var satisfaction = specialty.satisfaction ? specialty.satisfaction : 'N/A';
                     var rdv = specialty.rdv ? specialty.rdv : 'N/A';
+
+                    // Department information
+                    var departmentName = 'Non assigné';
+                    var departmentCode = '-';
+                    if (specialty.department) {
+                        departmentName = this.escapeHtml(specialty.department.name || 'Non assigné');
+                        departmentCode = this.escapeHtml(specialty.department.code || '-');
+                    }
+
                     return '<tr class="hover:bg-gray-50 transition-colors">' +
                         '<td class="px-6 py-4 whitespace-nowrap">' +
-                            '<div class="flex items-center">' +
-                                '<div class="w-10 h-10 bg-gradient-to-br from-' + color + '-500 to-' + color + '-600 rounded-lg flex items-center justify-center text-white mr-3">' +
-                                    '<i class="fas ' + icon + '"></i>' +
-                                '</div>' +
-                                '<div>' +
-                                    '<div class="font-semibold text-gray-900">' + specialtyName + '</div>' +
-                                    '<div class="text-sm text-gray-500">' + specialtyDesc + '</div>' +
-                                '</div>' +
-                            '</div>' +
+                        '<div class="flex items-center">' +
+                        '<div class="w-10 h-10 bg-gradient-to-br from-' + color + '-500 to-' + color + '-600 rounded-lg flex items-center justify-center text-white mr-3">' +
+                        '<i class="fas ' + icon + '"></i>' +
+                        '</div>' +
+                        '<div>' +
+                        '<div class="font-semibold text-gray-900">' + specialtyName + '</div>' +
+                        '<div class="text-sm text-gray-500">' + specialtyDesc + '</div>' +
+                        '</div>' +
+                        '</div>' +
                         '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">' + specialtyCode + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">' + departmentName + '<br><span class="text-xs text-gray-400">' + departmentCode + '</span></td>' +
                         '<td class="px-6 py-4 whitespace-nowrap">' +
-                            '<span class="px-3 py-1 text-xs font-bold rounded-full bg-' + color + '-100 text-' + color + '-700">' + doctorsCount + ' médecins</span>' +
+                        '<span class="px-3 py-1 text-xs font-bold rounded-full bg-' + color + '-100 text-' + color + '-700">' + doctorsCount + ' médecins</span>' +
                         '</td>' +
                         '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">' + (specialty.rdvPerMonth || 'N/A') + '</td>' +
                         '<td class="px-6 py-4 whitespace-nowrap">' +
-                            '<div class="flex items-center">' +
-                                '<i class="fas fa-star text-yellow-500 mr-1"></i>' +
-                                '<span class="font-semibold text-gray-900">' + (specialty.satisfaction || 'N/A') + '</span>' +
-                            '</div>' +
+                        '<div class="flex items-center">' +
+                        '<i class="fas fa-star text-yellow-500 mr-1"></i>' +
+                        '<span class="font-semibold text-gray-900">' + (specialty.satisfaction || 'N/A') + '</span>' +
+                        '</div>' +
                         '</td>' +
                         '<td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">' +
-                            '<button data-specialty-id="' + specialtyId + '" class="edit-specialty-btn text-primary-600 hover:text-primary-700 font-semibold"><i class="fas fa-edit"></i></button>' +
-                            '<button data-specialty-id="' + specialtyId + '" data-specialty-name="' + specialtyName + '" class="delete-specialty-btn text-red-600 hover:text-red-700 font-semibold"><i class="fas fa-trash"></i></button>' +
+                        '<button data-specialty-id="' + specialtyId + '" class="edit-specialty-btn text-primary-600 hover:text-primary-700 font-semibold"><i class="fas fa-edit"></i></button>' +
+                        '<button data-specialty-id="' + specialtyId + '" data-specialty-name="' + specialtyName + '" class="delete-specialty-btn text-red-600 hover:text-red-700 font-semibold"><i class="fas fa-trash"></i></button>' +
                         '</td>' +
-                    '</tr>';
+                        '</tr>';
                 }).join('');
                 this.attachEventListeners();
             },

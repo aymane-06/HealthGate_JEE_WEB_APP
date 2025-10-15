@@ -42,8 +42,9 @@ public class AdminDepartmentApiServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         try {
             DepartmentDTO dto = objectMapper.readValue(req.getInputStream(), DepartmentDTO.class);
+
             Department department = new Department();
-            department.setId(dto.id);
+
             department.setCode(dto.code);
             department.setName(dto.name);
             department.setDescription(dto.description);
@@ -53,20 +54,30 @@ public class AdminDepartmentApiServlet extends HttpServlet {
             department.setColor(dto.color);
             department.setCreatedAt(LocalDate.now());
             // Set specialties
+            List<Specialty> specialties = null;
             if (dto.specialties != null) {
-                List<Specialty> specialties = new ArrayList<>();
+                if(dto.specialties.isEmpty()){
+                    throw new Exception("At least one specialty must be selected");
+                }
+                specialties = new ArrayList<>();
                 for (UUID sid : dto.specialties) {
                     Specialty s = specialtyService.findById(sid);
+                    if(s.getDepartment()!=null){
+                        throw new Exception("Specialty "+s.getName()+" is already assigned to another department : "+s.getDepartment().getName());
+                    }
                     if (s != null) specialties.add(s);
                 }
-                department.setSpecialties(specialties);
+
             }
             // Set responsible doctor
             if (dto.headDoctorId != null) {
                 Doctor doc = doctorService.findById(dto.headDoctorId);
+                if(doc.getResponsibleDepartment()!=null){
+                    throw new Exception("Doctor is already head of another department : "+doc.getResponsibleDepartment().getName());
+                }
                 department.setResponsibleDoctor(doc);
             }
-            departmentService.save(department);
+            departmentService.saveDepartmentWithSpecialties(department, specialties, false);
             resp.getWriter().write("{\"status\":\"success\",\"id\":\"" + department.getId() + "\"}");
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,24 +116,29 @@ public class AdminDepartmentApiServlet extends HttpServlet {
             department.setContactInfo(departmentDto.contactInfo);
             department.setColor(departmentDto.color);
             // Update specialties
+            List<Specialty> specialties = new ArrayList<>();
             if (departmentDto.specialties != null) {
-                List<Specialty> specialties = new ArrayList<>();
                 for (UUID sid : departmentDto.specialties) {
                     Specialty s = specialtyService.findById(sid);
+                    if(s.getDepartment()!=null && !s.getDepartment().getId().equals(department.getId())){
+                        throw new Exception("Specialty "+s.getName()+" is already assigned to another department : "+s.getDepartment().getName());
+                    }
                     if (s != null) specialties.add(s);
                 }
-                department.setSpecialties(specialties);
             } else {
                 department.setSpecialties(new ArrayList<>());
             }
             // Update responsible doctor
             if (departmentDto.headDoctorId != null) {
                 Doctor doc = doctorService.findById(departmentDto.headDoctorId);
+                if(doc.getResponsibleDepartment()!=null && !doc.getResponsibleDepartment().getId().equals(department.getId())){
+                    throw new Exception("Doctor is already head of another department : "+doc.getResponsibleDepartment().getName());
+                }
                 department.setResponsibleDoctor(doc);
             } else {
                 department.setResponsibleDoctor(null);
             }
-            departmentService.update(department);
+            departmentService.saveDepartmentWithSpecialties(department, specialties, true);
 
             resp.getWriter().write("{\"status\":\"success\"}");
         } catch (Exception e) {
@@ -166,7 +182,7 @@ public class AdminDepartmentApiServlet extends HttpServlet {
         String order = req.getParameter("order");
         String statusFilter = req.getParameter("status");
         String page = req.getParameter("page");
-        System.out.println("Search: " + search + ", SortBy: " + sortBy + ", Order: " + order + ", Status: " + statusFilter);
+
 
 
 
@@ -174,6 +190,7 @@ public class AdminDepartmentApiServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 // Get all departments
                 List<Department> departments = departmentService.findAllDepartments();
+
                 if (search != null && !search.trim().isEmpty()) {
                     String lowerSearch = search.toLowerCase();
                     departments.removeIf(d -> !(d.getName() != null && d.getName().toLowerCase().contains(lowerSearch)) &&

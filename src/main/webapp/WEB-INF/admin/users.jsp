@@ -552,12 +552,15 @@
                                     <i class="fas fa-stethoscope text-secondary-600 mr-2"></i>Spécialité <span class="text-red-500">*</span>
                                 </label>
                                 <select name="specialtyId" id="doctorSpecialty" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition-all">
-                                    <option value="">Sélectionner une spécialité</option>
-                                    <option value="1">Cardiologie</option>
-                                    <option value="2">Neurologie</option>
-                                    <option value="3">Pédiatrie</option>
-                                    <option value="4">Dermatologie</option>
-                                    <option value="5">Orthopédie</option>
+                                    <option value=" ">Sélectionner une spécialité</option>
+                                    <c:if test="${not empty specialties}">
+                                        <c:forEach items="${specialties}" var="specialty">
+                                            <option value="${specialty.id}">${specialty.name}</option>
+                                        </c:forEach>
+                                    </c:if>
+                                    <c:if test="${empty specialties}">
+                                        <option value="" disabled>Aucune spécialité disponible</option>
+                                    </c:if>
                                 </select>
                             </div>
                         </div>
@@ -760,6 +763,7 @@
 
                     const data = await response.json();
                     if (data.status === 'success') {
+                        console.log(data);
                         this.state.totalElements = data.data.pagination.totalElements;
                         this.state.totalPages = data.data.pagination.totalPages;
                         this.state.usersCache = data.data.users; // Store users in cache
@@ -947,6 +951,7 @@
             editUser(userId) {
                 // Find user in cache
                 const user = this.state.usersCache.find(u => u.id === userId);
+                console.log(user);
                 if (!user) {
                     this.showToast('Utilisateur non trouvé', 'error');
                     return;
@@ -1021,7 +1026,7 @@
                     
                     if (matriculeInput) matriculeInput.value = user.matricule || '';
                     if (titleInput) titleInput.value = user.title || '';
-                    if (specialtySelect && user.specialtyId) specialtySelect.value = user.specialtyId;
+                    if (specialtySelect && user.specialty?.id) specialtySelect.value = user.specialty.id || " ";
                 } else if (user.role === 'STAFF') {
                     const positionInput = document.querySelector('input[name="position"]');
                     const employeeIdInput = document.querySelector('input[name="employeeId"]');

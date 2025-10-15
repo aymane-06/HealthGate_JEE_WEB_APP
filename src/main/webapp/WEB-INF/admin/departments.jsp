@@ -599,7 +599,8 @@
                 if (specialtiesResponse.ok) {
                     const specialtiesData = await specialtiesResponse.json();
                     console.log(specialtiesData)
-                    this.state.specialties = specialtiesData.data?.specialties || [];
+                    this.state.specialties = specialtiesData.data.specialties || [];
+
                 }
 
                 this.populateFormSelects();
@@ -763,8 +764,8 @@
                 : 'bg-red-100 text-red-800';
             const statusText = department.isActive  ? 'Actif' : 'Inactif';
             const staffCount = department.staffCount || 0;
-            const specialtiesCount = department.specialtiesCount || 0;
-            const phone = department.phone || 'N/A';
+            const specialtiesCount = department.specialties.length || 0;
+            const phone = department.contactInfo || 'N/A';
             const location = department.location || 'Non spécifiée';
             const description = department.description || 'Aucune description';
 
@@ -808,12 +809,12 @@
         },
 
         createDepartmentRow(department) {
-            const statusClass = department.status === 'ACTIVE'
+            const statusClass = department.isActive
                 ? 'bg-green-100 text-green-800'
                 : 'bg-red-100 text-red-800';
-            const statusText = department.status === 'ACTIVE' ? 'Actif' : 'Inactif';
+            const statusText = department.isActive ? 'Actif' : 'Inactif';
             const staffCount = department.staffCount || 0;
-            const specialtiesCount = department.specialtiesCount || 0;
+            const specialtiesCount = department.specialties.length || 0;
 
             var headDoctorName = 'Non assigné';
             if (department.headDoctor) {
@@ -894,7 +895,7 @@
                 return;
             }
             console.log(department);
-            this.openModal('Modifier le Département');
+           await this.openModal('Modifier le Département');
 
             // Populate form
             document.getElementById('departmentId').value = department.id;
@@ -1005,7 +1006,8 @@
             }
         },
 
-        openModal(title) {
+         openModal(title) {
+
             if (!title) title = 'Nouveau Département';
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('departmentModal').classList.remove('hidden');
@@ -1018,6 +1020,7 @@
         },
 
         openAddModal() {
+
             this.openModal('Nouveau Département');
             // Reset form
             document.getElementById('departmentForm').reset();

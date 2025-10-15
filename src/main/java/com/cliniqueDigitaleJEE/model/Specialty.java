@@ -18,7 +18,7 @@ public class Specialty {
     private String name;
     @Column(columnDefinition = "TEXT")
     private String description;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "department_id", nullable = true)
     private Department department;
     @OneToMany(mappedBy = "specialty",fetch = FetchType.EAGER)
