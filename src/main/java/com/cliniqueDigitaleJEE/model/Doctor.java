@@ -1,5 +1,6 @@
 package com.cliniqueDigitaleJEE.model;
 
+import com.cliniqueDigitaleJEE.model.ENUMS.AvailabilityStatus;
 import com.cliniqueDigitaleJEE.model.ENUMS.Role;
 import jakarta.persistence.*;
 
@@ -16,13 +17,15 @@ public class Doctor extends User{
     @JoinColumn(name = "specialty_id", nullable = true)
     private Specialty specialty;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    private List<Availability> availabilities;
+    private List<Availability> availabilities = new java.util.ArrayList<>();
 
     @OneToOne(mappedBy = "responsibleDoctor", fetch = FetchType.EAGER)
     private Department responsibleDepartment;
 
+    public Doctor() {
+        super();
+    }
 
-    public Doctor() {}
 
     public Doctor(String name, String email, String password, String matricule, String title) {
         super(name, email, password, Role.DOCTOR);
@@ -67,7 +70,19 @@ public class Doctor extends User{
         this.responsibleDepartment = responsibleDepartment;
     }
 
+    @PrePersist
+    private void assignDoctorToDepartment() {
+        String[] Days={"Lundi","Mardi","Mercredi","Jeudi","Vendredi"};
+        for(String day:Days){
+            Availability availability=new Availability();
+            availability.setDay(day);
+            availability.setDoctor(this);
+            availability.setStatus(AvailabilityStatus.UNAVAILABLE);
+            availability.setStartTime(java.time.LocalTime.of(9,0));
+            availability.setEndTime(java.time.LocalTime.of(17,0));
+            this.availabilities.add(availability);
+        }
+    }
+
 
 }
-
-

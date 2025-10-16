@@ -19,8 +19,8 @@ public class Availability {
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
-    @Column(nullable = false, columnDefinition = "date")
-    private LocalDate day;
+    @Column(nullable = false)
+    private String day;
     @Column(nullable = false, columnDefinition = "time")
     private LocalTime startTime;
     @Column(nullable = false, columnDefinition = "time")
@@ -28,7 +28,7 @@ public class Availability {
 
     public Availability() {}
 
-    public Availability(AvailabilityStatus status, Doctor doctor, LocalDate day, LocalTime startTime, LocalTime endTime) {
+    public Availability(AvailabilityStatus status, Doctor doctor, String day, LocalTime startTime, LocalTime endTime) {
         this.status = status;
         this.doctor = doctor;
         this.day = day;
@@ -60,11 +60,11 @@ public class Availability {
         this.doctor = doctor;
     }
 
-    public LocalDate getDay() {
+    public String getDay() {
         return day;
     }
 
-    public void setDay(LocalDate day) {
+    public void setDay(String day) {
         this.day = day;
     }
 

@@ -5,6 +5,8 @@ import com.cliniqueDigitaleJEE.model.Doctor;
 import com.cliniqueDigitaleJEE.model.Patient;
 import com.cliniqueDigitaleJEE.model.ENUMS.Gender;
 import com.cliniqueDigitaleJEE.model.ENUMS.Role;
+import com.cliniqueDigitaleJEE.model.Department;
+import com.cliniqueDigitaleJEE.model.Specialty;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
@@ -59,8 +61,82 @@ public class DatabaseSeeder {
     
     private void seedUsers() {
         LOGGER.info("👥 Seeding users...");
-        
-                // 1. Admin User
+
+        // --- Departments ---
+        Department cardiology = new Department();
+        cardiology.setCode("CARD");
+        cardiology.setName("Cardiologie");
+        cardiology.setDescription("Département spécialisé en cardiologie et soins du cœur.");
+        cardiology.setActive(true);
+        cardiology.setLocation("Bâtiment A, 1er étage");
+        cardiology.setContactInfo("cardio@clinique.ma, +212 5 22 33 44 55");
+        cardiology.setColor("red"); // Tailwind color name
+        cardiology.setCreatedAt(LocalDate.now());
+        em.persist(cardiology);
+        LOGGER.info("✅ Created Department: Cardiologie");
+
+        Department neurology = new Department();
+        neurology.setCode("NEUR");
+        neurology.setName("Neurologie");
+        neurology.setDescription("Département spécialisé en neurologie et soins du système nerveux.");
+        neurology.setActive(true);
+        neurology.setLocation("Bâtiment B, 2ème étage");
+        neurology.setContactInfo("neuro@clinique.ma, +212 5 22 33 44 66");
+        neurology.setColor("blue"); // Tailwind color name
+        neurology.setCreatedAt(LocalDate.now());
+        em.persist(neurology);
+        LOGGER.info("✅ Created Department: Neurologie");
+
+        Department pediatrics = new Department();
+        pediatrics.setCode("PED");
+        pediatrics.setName("Pédiatrie");
+        pediatrics.setDescription("Département spécialisé en pédiatrie et soins des enfants.");
+        pediatrics.setActive(true);
+        pediatrics.setLocation("Bâtiment C, RDC");
+        pediatrics.setContactInfo("pediatrie@clinique.ma, +212 5 22 33 44 77");
+        pediatrics.setColor("green"); // Tailwind color name
+        pediatrics.setCreatedAt(LocalDate.now());
+        em.persist(pediatrics);
+        LOGGER.info("✅ Created Department: Pédiatrie");
+
+        // --- Specialties ---
+        Specialty cardiologist = new Specialty();
+        cardiologist.setCode("CARDIO");
+        cardiologist.setName("Cardiologue");
+        cardiologist.setDescription("Spécialiste des maladies du cœur.");
+        cardiologist.setDepartment(cardiology);
+        cardiologist.setColor("red"); // Tailwind color name
+        cardiologist.setActive(true);
+        cardiologist.setCreatedAt(java.time.LocalDateTime.now());
+        cardiologist.setIcon("fa-heartbeat");
+        em.persist(cardiologist);
+        LOGGER.info("✅ Created Specialty: Cardiologue (Cardiologie)");
+
+        Specialty neurologist = new Specialty();
+        neurologist.setCode("NEURO");
+        neurologist.setName("Neurologue");
+        neurologist.setDescription("Spécialiste du système nerveux.");
+        neurologist.setDepartment(neurology);
+        neurologist.setColor("blue"); // Tailwind color name
+        neurologist.setActive(true);
+        neurologist.setCreatedAt(java.time.LocalDateTime.now());
+        neurologist.setIcon("fa-brain");
+        em.persist(neurologist);
+        LOGGER.info("✅ Created Specialty: Neurologue (Neurologie)");
+
+        Specialty pediatrician = new Specialty();
+        pediatrician.setCode("PEDIAT");
+        pediatrician.setName("Pédiatre");
+        pediatrician.setDescription("Spécialiste des enfants.");
+        pediatrician.setDepartment(pediatrics);
+        pediatrician.setColor("green"); // Tailwind color name
+        pediatrician.setActive(true);
+        pediatrician.setCreatedAt(java.time.LocalDateTime.now());
+        pediatrician.setIcon("fa-baby");
+        em.persist(pediatrician);
+        LOGGER.info("✅ Created Specialty: Pédiatre (Pédiatrie)");
+
+        // 1. Admin User
         Admin admin = new Admin();
         // Ne PAS définir l'ID - laissons JPA le générer automatiquement
         admin.setName("Mohammed Alami");
@@ -70,7 +146,7 @@ public class DatabaseSeeder {
         admin.setActive(true);
         em.persist(admin);
         LOGGER.info("✅ Created Admin: admin@clinique.ma / admin123");
-        
+
         // 2. Doctor User - Cardiology
         Doctor doctor1 = new Doctor();
         doctor1.setName("Dr. Sara Bennani");
@@ -79,10 +155,11 @@ public class DatabaseSeeder {
         doctor1.setRole(Role.DOCTOR); // Définir le rôle
         doctor1.setMatricule("DOC-2024-001");
         doctor1.setTitle("Cardiologue");
+        doctor1.setSpecialty(cardiologist);
         doctor1.setActive(true);
         em.persist(doctor1);
         LOGGER.info("✅ Created Doctor: sara.bennani@clinique.ma / doctor123");
-        
+
         // 3. Doctor User - Neurology
         Doctor doctor2 = new Doctor();
         doctor2.setName("Dr. Ahmed Idrissi");
@@ -91,10 +168,11 @@ public class DatabaseSeeder {
         doctor2.setRole(Role.DOCTOR);
         doctor2.setMatricule("DOC-2024-002");
         doctor2.setTitle("Neurologue");
+        doctor2.setSpecialty(neurologist);
         doctor2.setActive(true);
         em.persist(doctor2);
         LOGGER.info("✅ Created Doctor: ahmed.idrissi@clinique.ma / doctor123");
-        
+
         // 4. Doctor User - Pediatrics
         Doctor doctor3 = new Doctor();
         doctor3.setName("Dr. Laila Fassi");
@@ -103,6 +181,7 @@ public class DatabaseSeeder {
         doctor3.setRole(Role.DOCTOR);
         doctor3.setMatricule("DOC-2024-003");
         doctor3.setTitle("Pédiatre");
+        doctor3.setSpecialty(pediatrician);
         doctor3.setActive(true);
         em.persist(doctor3);
         LOGGER.info("✅ Created Doctor: laila.fassi@clinique.ma / doctor123");

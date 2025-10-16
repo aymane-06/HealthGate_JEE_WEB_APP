@@ -1,11 +1,14 @@
 package com.cliniqueDigitaleJEE.controller.doctor;
 
+import com.cliniqueDigitaleJEE.dto.UserDTO;
+import com.cliniqueDigitaleJEE.model.Doctor;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.hibernate.Session;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,9 +23,10 @@ public class DoctorAvailabilityServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (!checkDoctorAccess(req, resp)) return;
-        
-        // TODO: Fetch availability from service layer
-        req.setAttribute("availabilities", getMockAvailabilities());
+        HttpSession session = req.getSession(true);
+        UserDTO doctor= (UserDTO) session.getAttribute("user");
+        req.setAttribute("doctor", doctor);
+
         
         req.getRequestDispatcher("/WEB-INF/doctor/availability.jsp").forward(req, resp);
     }
