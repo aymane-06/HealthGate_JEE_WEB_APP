@@ -23,9 +23,7 @@ public class DoctorAvailabilityServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (!checkDoctorAccess(req, resp)) return;
-        HttpSession session = req.getSession(true);
-        UserDTO doctor= (UserDTO) session.getAttribute("user");
-        req.setAttribute("doctor", doctor);
+
 
         
         req.getRequestDispatcher("/WEB-INF/doctor/availability.jsp").forward(req, resp);

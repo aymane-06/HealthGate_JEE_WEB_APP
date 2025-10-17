@@ -249,87 +249,8 @@
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-100">
-                                        <tr class="hover:bg-primary-50 transition-all">
-                                            <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-800 flex items-center">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                                                Lundi
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">08:00</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">17:00</td>
-                                            <td class="px-6 py-4 whitespace-nowrap flex items-center space-x-2">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
-                                                    Disponible
-                                                </span>
-                                                <button onclick="openEditDayModal('Lundi', '08:00', '17:00', 'Disponible')" class="ml-2 p-2 rounded hover:bg-gray-100" title="Éditer">
-                                                    <i class="fas fa-pen text-gray-500"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-primary-50 transition-all">
-                                            <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-800 flex items-center">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                                                Mardi
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">08:00</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">17:00</td>
-                                            <td class="px-6 py-4 whitespace-nowrap flex items-center space-x-2">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
-                                                    Disponible
-                                                </span>
-                                                <button onclick="openEditDayModal('Mardi', '08:00', '17:00', 'Disponible')" class="ml-2 p-2 rounded hover:bg-gray-100" title="Éditer">
-                                                    <i class="fas fa-pen text-gray-500"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-primary-50 transition-all">
-                                            <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-800 flex items-center">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-2"></span>
-                                                Mercredi
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">09:00</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">15:00</td>
-                                            <td class="px-6 py-4 whitespace-nowrap flex items-center space-x-2">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 border border-yellow-200">
-                                                    En congé
-                                                </span>
-                                                <button onclick="openEditDayModal('Mercredi', '09:00', '15:00', 'En congé')" class="ml-2 p-2 rounded hover:bg-gray-100" title="Éditer">
-                                                    <i class="fas fa-pen text-gray-500"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-primary-50 transition-all">
-                                            <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-800 flex items-center">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>
-                                                Jeudi
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">-</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">-</td>
-                                            <td class="px-6 py-4 whitespace-nowrap flex items-center space-x-2">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
-                                                    Indisponible
-                                                </span>
-                                                <button onclick="openEditDayModal('Jeudi', '-', '-', 'Indisponible')" class="ml-2 p-2 rounded hover:bg-gray-100" title="Éditer">
-                                                    <i class="fas fa-pen text-gray-500"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-primary-50 transition-all">
-                                            <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-800 flex items-center">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                                                Vendredi
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">10:00</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">16:00</td>
-                                            <td class="px-6 py-4 whitespace-nowrap flex items-center space-x-2">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
-                                                    Disponible
-                                                </span>
-                                                <button onclick="openEditDayModal('Vendredi', '10:00', '16:00', 'Disponible')" class="ml-2 p-2 rounded hover:bg-gray-100" title="Éditer">
-                                                    <i class="fas fa-pen text-gray-500"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
+                                    <tbody id="tbody" class="bg-white divide-y divide-gray-100">
+
                                     </tbody>
                                 </table>
                             </div>
@@ -567,7 +488,7 @@
                 </div>
             </div>
             <form id="editDayForm" class="p-6 space-y-4">
-                <input type="hidden" id="editDayName">
+                <input type="hidden" name="availabilityId" id="availabilityId">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Jour</label>
                     <input type="text" id="editDayDisplay" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly>
@@ -575,19 +496,19 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Heure d'ouverture</label>
-                        <input type="time" id="editDayStart" class="w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+                        <input type="time" name="startTime" id="editDayStart" class="w-full px-4 py-3 border border-gray-300 rounded-lg" required>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Heure de fermeture</label>
-                        <input type="time" id="editDayEnd" class="w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+                        <input type="time" name="endTime" id="editDayEnd" class="w-full px-4 py-3 border border-gray-300 rounded-lg" required>
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Statut</label>
-                    <select id="editDayStatus" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
-                        <option value="Disponible">Disponible</option>
-                        <option value="En congé">En congé</option>
-                        <option value="Indisponible">Indisponible</option>
+                    <select id="editDayStatus" name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                        <option value="AVAILABLE">Disponible</option>
+                        <option value="ON_LEAVE">En congé</option>
+                        <option value="UNAVAILABLE">Indisponible</option>
                     </select>
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-4">
@@ -621,9 +542,9 @@
         alert('Modal pour les absences à implémenter');
     }
 
-    function openEditDayModal(day, startTime, endTime, status) {
+    function openEditDayModal(id,day, startTime, endTime, status) {
         document.getElementById('editDayModal').classList.remove('hidden');
-        document.getElementById('editDayName').value = day;
+        document.getElementById('availabilityId').value = id;
         document.getElementById('editDayDisplay').value = day;
         document.getElementById('editDayStart').value = startTime !== '-' ? startTime : '';
         document.getElementById('editDayEnd').value = endTime !== '-' ? endTime : '';
@@ -632,9 +553,84 @@
     function closeEditDayModal() {
         document.getElementById('editDayModal').classList.add('hidden');
     }
-    document.getElementById('editDayForm').addEventListener('submit', function(e) {
+
+    function showToast(message, type) {
+        // Remove any existing toast
+        const oldToast = document.getElementById('customToast');
+        if (oldToast) oldToast.remove();
+
+        // Create toast container
+        const toast = document.createElement('div');
+        toast.id = 'customToast';
+
+        // Determine icon and color based on type
+        var icon, color;
+        if (type === 'success') {
+            icon = 'fa-check-circle';
+            color = 'bg-green-600';
+        } else if (type === 'error') {
+            icon = 'fa-exclamation-circle';
+            color = 'bg-red-600';
+        } else if (type === 'warning') {
+            icon = 'fa-exclamation-triangle';
+            color = 'bg-yellow-600';
+        } else {
+            icon = 'fa-info-circle';
+            color = 'bg-blue-600';
+        }
+
+        toast.className = 'fixed top-6 right-6 z-[9999] px-6 py-4 rounded-lg shadow-lg text-white font-semibold flex items-center space-x-3 animate-fade-in ' + color;
+
+        toast.innerHTML =
+            '<i class="fas ' + icon + ' text-xl"></i>' +
+            '<span>' + message + '</span>';
+
+        document.body.appendChild(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(function() {
+            toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(function() {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 500);
+        }, 3000);
+    }
+
+    document.getElementById('editDayForm').addEventListener('submit', async function (e) {
         e.preventDefault();
-        // Here you would update the table and persist changes as needed
+        let formData = new FormData(this);
+        console.log(formData.get('availabilityId'));
+        console.log(formData.get('startTime'));
+        console.log(formData.get('endTime'));
+        console.log(formData.get('status'));
+
+        try{
+
+        let res = await fetch('${pageContext.request.contextPath}/api/doctor/availabilities/' + formData.get('availabilityId'), {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                startTime: formData.get('startTime'),
+                endTime: formData.get('endTime'),
+                status: formData.get('status')
+            })
+        });
+        let data = await res.json();
+            console.log(data);
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Erreur lors de la mise à jour');
+        }
+        getAvailabilities();
+        showToast('Disponibilité modifiée avec succès', 'success');
+        } catch (error) {
+            showToast(error.message, 'error');
+            return;
+        }
+
         closeEditDayModal();
         showToast('Disponibilité modifiée avec succès', 'success');
     });
@@ -653,24 +649,101 @@
             alert('Menu mobile à implémenter');
         });
     }
-    async function getAvailibilities() {
-            let availabilities = [];
+    async function getAvailabilities() {
+        let availabilities = [];
+        let contexPath= '${pageContext.request.contextPath}';
+            console.log(contexPath);
+        let userId = '${sessionScope.userID}';
+            console.log(userId);
+        try {
+            let response = await fetch('${pageContext.request.contextPath}/api/doctor/availabilities/${sessionScope.userID}', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-         let response = fetch("${pageContext.request.contextPath}/doctor/availabilities",{
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        });
-        let data = await response.json();
-        if(data.status === 'success') {
-            availabilities = data.availabilities;
-            console.log(availabilities);
-            return availabilities;
+
+            let data = await response.json();
+            console.log(data);
+            if (data.status === 'success') {
+                availabilities = data.data;
+                console.log(availabilities);
+                renderAvailabilities(availabilities)
+            } else {
+                throw new Error(data.message || 'Failed to fetch availabilities');
+            }
+        } catch (error) {
+            showToast(error.message, 'error');
+            return [];
         }
+    }
+    getAvailabilities();
 
+    function renderAvailabilities(availabilities) {
+        let weekDaysOrder = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+        availabilities.sort((a, b) => {
+            return weekDaysOrder.indexOf(a.day) - weekDaysOrder.indexOf(b.day);
+        });
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = ''; // Clear existing rows
 
+        availabilities.forEach(function(avail) {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-primary-50 transition-all';
 
+            const statusColors = {
+                'AVAILABLE': ['bg-green-100', 'text-green-700', 'border-green-200'],
+                'ON_LEAVE': ['bg-yellow-100', 'text-yellow-700', 'border-yellow-200'],
+                'UNAVAILABLE': ['bg-red-100', 'text-red-700', 'border-red-200']
+            };
+
+            // Use enum values from your backend
+            const statusText = {
+                'AVAILABLE': 'Disponible',
+                'ON_LEAVE': 'En congé',
+                'UNAVAILABLE': 'Indisponible'
+            };
+
+            const statusKey = avail.status || 'UNAVAILABLE';
+            const [bgClass, textClass, borderClass] = statusColors[statusKey] || ['bg-gray-100', 'text-gray-700', 'border-gray-200'];
+            const displayStatus = statusText[statusKey] || 'Indisponible';
+
+            // Determine dot color
+            let dotColor = 'bg-gray-500';
+            if (statusKey === 'AVAILABLE') dotColor = 'bg-green-500';
+            else if (statusKey === 'ON_LEAVE') dotColor = 'bg-yellow-400';
+            else if (statusKey === 'UNAVAILABLE') dotColor = 'bg-red-500';
+
+            const dayName = avail.day;
+
+            // Format times (remove seconds if present)
+            const startTime = avail.startTime ? avail.startTime.substring(0, 5) : '-';
+            const endTime = avail.endTime ? avail.endTime.substring(0, 5) : '-';
+
+            tr.innerHTML =
+                '<td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-800 flex items-center">' +
+                '<span class="inline-block w-2 h-2 rounded-full ' + dotColor + ' mr-2"></span>' +
+                dayName +
+                '</td>' +
+                '<td class="px-6 py-4 whitespace-nowrap text-gray-700">' + startTime + '</td>' +
+                '<td class="px-6 py-4 whitespace-nowrap text-gray-700">' + endTime + '</td>' +
+                '<td class="px-6 py-4 whitespace-nowrap">' +
+                '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ' + bgClass + ' ' + textClass + ' ' + borderClass + '">' +
+                displayStatus +
+                '</span>' +
+                '</td>' +
+                '<td class="px-6 py-4 whitespace-nowrap">' +
+                '<button onclick="openEditDayModal(\'' + avail.id + '\', \'' + avail.day + '\', \'' + avail.startTime + '\', \'' + avail.endTime + '\', \'' + avail.status + '\')" class="p-2 rounded hover:bg-gray-100 transition-colors" title="Éditer">' +
+                '<i class="fas fa-pen text-gray-500"></i>' +
+                '</button>' +
+                '</td>';
+
+            tbody.appendChild(tr);
+        });
     }
 
 </script>

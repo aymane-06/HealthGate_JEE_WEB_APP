@@ -61,6 +61,7 @@ public class LoginServlet extends HttpServlet {
                 
                 // Mock user data - replace with actual user from database
                 session.setAttribute("user", userDTO);
+                session.setAttribute("userID", user.getId());
                 session.setAttribute("userEmail", email);
                 session.setAttribute("userRole", user.getRole());
                 
