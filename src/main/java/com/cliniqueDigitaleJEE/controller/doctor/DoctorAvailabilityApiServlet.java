@@ -103,6 +103,12 @@ public class DoctorAvailabilityApiServlet extends HttpServlet {
             out.flush();
             return;
         }
+        if(endTime.isBefore(startTime) || endTime.equals(startTime)){
+            resp.setStatus(400);
+            out.write("{\"status\":\"error\",\"message\":\"endTime must be after startTime\"}");
+            out.flush();
+            return;
+        }
 
         String availabilityID = pathInfo.substring(1);
         try {
