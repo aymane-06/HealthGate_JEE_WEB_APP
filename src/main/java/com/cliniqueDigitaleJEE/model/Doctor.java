@@ -2,6 +2,7 @@ package com.cliniqueDigitaleJEE.model;
 
 import com.cliniqueDigitaleJEE.model.ENUMS.AvailabilityStatus;
 import com.cliniqueDigitaleJEE.model.ENUMS.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.lang.ref.Reference;
@@ -15,6 +16,7 @@ public class Doctor extends User{
     private String title;
     @ManyToOne
     @JoinColumn(name = "specialty_id", nullable = true)
+    @JsonManagedReference
     private Specialty specialty;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<Availability> availabilities = new java.util.ArrayList<>();

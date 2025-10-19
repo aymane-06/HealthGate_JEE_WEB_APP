@@ -1,5 +1,6 @@
 package com.cliniqueDigitaleJEE.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -20,8 +21,10 @@ public class Specialty {
     private String description;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "department_id", nullable = true)
+    @JsonBackReference
     private Department department;
     @OneToMany(mappedBy = "specialty",fetch = FetchType.EAGER)
+    @JsonBackReference
     private List<Doctor> doctors;
     private String color;
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")

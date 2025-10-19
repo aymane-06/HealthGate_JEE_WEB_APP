@@ -1,5 +1,6 @@
 package com.cliniqueDigitaleJEE.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ public class Department {
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isActive;
     @OneToMany(mappedBy = "department", fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<Specialty> specialties;
     @OneToOne(
         optional = true

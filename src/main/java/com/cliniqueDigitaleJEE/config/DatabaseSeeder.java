@@ -158,6 +158,8 @@ public class DatabaseSeeder {
         doctor1.setSpecialty(cardiologist);
         doctor1.setActive(true);
         em.persist(doctor1);
+        cardiology.setResponsibleDoctor(doctor1);
+        em.merge(cardiology);
         LOGGER.info("✅ Created Doctor: sara.bennani@clinique.ma / doctor123");
 
         // 3. Doctor User - Neurology
@@ -171,6 +173,8 @@ public class DatabaseSeeder {
         doctor2.setSpecialty(neurologist);
         doctor2.setActive(true);
         em.persist(doctor2);
+        neurology.setResponsibleDoctor(doctor2);
+        em.merge(neurology);
         LOGGER.info("✅ Created Doctor: ahmed.idrissi@clinique.ma / doctor123");
 
         // 4. Doctor User - Pediatrics
@@ -184,6 +188,8 @@ public class DatabaseSeeder {
         doctor3.setSpecialty(pediatrician);
         doctor3.setActive(true);
         em.persist(doctor3);
+        pediatrics.setResponsibleDoctor(doctor3);
+        em.merge(pediatrics);
         LOGGER.info("✅ Created Doctor: laila.fassi@clinique.ma / doctor123");
         
         // 5. Patient User

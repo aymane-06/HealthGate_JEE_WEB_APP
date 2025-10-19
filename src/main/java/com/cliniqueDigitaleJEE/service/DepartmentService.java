@@ -1,11 +1,14 @@
 package com.cliniqueDigitaleJEE.service;
 
+import com.cliniqueDigitaleJEE.dto.DepartmentDTO;
+import com.cliniqueDigitaleJEE.mapper.DepartmentMapper;
 import com.cliniqueDigitaleJEE.model.Department;
 import com.cliniqueDigitaleJEE.model.Specialty;
 import com.cliniqueDigitaleJEE.repository.Interfaces.DepartmentRepository;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,18 +21,23 @@ public class DepartmentService {
     @Inject
     private SpecialtyService specialtyService;
 
-    public List<Department> findAllDepartments() {
+    @Inject
+    private DepartmentMapper departmentMapper;
+
+    public List<DepartmentDTO> findAllDepartments() {
         List<Department> departments = departmentRepository.findAll();
-        // Force initialization of specialties to avoid LazyInitializationException
+        List<DepartmentDTO> departmentDTOs = new ArrayList<>();
         for (Department d : departments) {
-            if (d.getSpecialties() != null) d.getSpecialties().size();
+            DepartmentDTO departmentDTO= departmentMapper.EntityToDto(d);
+            departmentDTOs.add(departmentDTO);
         }
-        return departments;
+        return departmentDTOs;
     }
 
     public Department findById(UUID id) {
         Department d = departmentRepository.findById(id);
         if (d != null && d.getSpecialties() != null) d.getSpecialties().size();
+
         return d;
     }
 
@@ -75,5 +83,13 @@ public class DepartmentService {
         } else {
             departmentRepository.save(department);
         }
+    }
+    public List<Specialty> findSpecialtiesByDepartmentId(UUID departmentId) {
+        Department department = departmentRepository.findById(departmentId);
+        if (department != null && department.getSpecialties() != null) {
+            department.getSpecialties().size(); // Initialize specialties
+            return department.getSpecialties();
+        }
+        return new ArrayList<>();
     }
 }

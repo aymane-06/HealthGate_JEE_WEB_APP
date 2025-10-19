@@ -888,12 +888,12 @@
         },
 
         async editDepartment(departmentId) {
-
             const department = this.state.departmentsCache.find(function(d) { return d.id === departmentId; });
             if (!department) {
                 this.showToast('Département non trouvé', 'error');
                 return;
             }
+
             console.log(department);
            await this.openModal('Modifier le Département');
 
@@ -905,11 +905,11 @@
             const headDoctorSelect= document.querySelector('select[name="headDoctorId"]');
             if (headDoctorSelect && headDoctorSelect.tomselect) {
                 console.log(department.responsibleDoctor);
-                headDoctorSelect.tomselect.setValue(department.responsibleDoctor.id);
+                headDoctorSelect.tomselect.setValue(department.headDoctorId);
 
             }
 
-            document.querySelector('input[name="phone"]').value = department.phone || '';
+            document.querySelector('input[name="phone"]').value = department.contactInfo || '';
             document.querySelector('input[name="location"]').value = department.location || '';
             document.querySelector('select[name="color"]').value = department.color || 'blue';
             document.querySelector('input[name="phone"]').value = department.contactInfo || '';
