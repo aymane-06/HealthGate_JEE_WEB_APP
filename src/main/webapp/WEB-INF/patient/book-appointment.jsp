@@ -1099,7 +1099,7 @@
             container.innerHTML = '<div class="doctor-loading-spinner" style="display:flex;justify-content:center;align-items:center;height:80px;">' +
                 '<div class="spinner-border" style="width:2rem;height:2rem;border:4px solid #ccc;border-top:4px solid #6c63ff;border-radius:50%;animation:spin 1s linear infinite;"></div>' +
                 '</div>' +
-                '<style>@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}</style>';
+                '<style>@keyframes spin{0%{transform:rote(0deg);}100%{transform:rotate(360deg);}}</style>';
         }
         try {
             const response = await fetch('${pageContext.request.contextPath}/api/patient/departments/' + specialityId + '/doctors');
@@ -1319,9 +1319,30 @@
         });
 
         // Final confirmation button
-        document.getElementById('final-confirm-btn').addEventListener('click', function() {
-            // In a real app, you would submit the form to the server here
-            // For this demo, we'll just show the success step
+        document.getElementById('final-confirm-btn').addEventListener('click', async function() {
+            
+            bookingData.remarks = document.querySelector('#step-confirmation textarea').value;
+            bookingData.patientId = '${sessionScope.user.id}';
+            console.log(JSON.stringify(bookingData));
+            // Here you would typically send bookingData to the server via AJAX
+            try {
+                const response = await fetch('${pageContext.request.contextPath}/api/patient/book-appointment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log('Booking successful:', data);
+            } catch (error) {
+                console.error('Error booking appointment:', error);
+            }
+
+            
             goToStep('success');
             createConfetti();
         });
@@ -1524,7 +1545,11 @@
 
                         // Update selected date
                         const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
-                        bookingData.date = selectedDate;
+                        // Store as local date string (yyyy-MM-ddT00:00:00) to avoid timezone issues
+                        const localDateString = selectedDate.getFullYear() + '-' +
+                            String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' +
+                            String(selectedDate.getDate()).padStart(2, '0') + 'T00:00:00';
+                        bookingData.date = localDateString;
 
                         // Update UI
                         updateSelectedDate(selectedDate);
@@ -1558,7 +1583,8 @@
 
         async function generateTimeSlots(dateObj) {
             const timeSlotsContainer = document.getElementById('time-slots-container');
-            timeSlotsContainer.innerHTML = '';
+            // Show loading spinner
+            timeSlotsContainer.innerHTML = '<div class="flex justify-center items-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div></div>';
 
             console.log(dateObj);
             // fetch available time slots from server based on selected date and doctor
@@ -1566,62 +1592,68 @@
             let dayName = dateObj.toLocaleDateString('fr-FR', { weekday: 'long' });
             console.log(bookingData);
 
-            let response;
+            let timeSlots = [];
             try {
-                response = await fetch('${pageContext.request.contextPath}/api/patient/doctors/' + doctorId + '/availabilities?day=' + dateObj);
+                const response = await fetch('${pageContext.request.contextPath}/api/patient/doctors/' + doctorId + '/availabilities?day=' + dateObj);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                const slots= data.timeSlots; // Assume server returns an array of time slots
-                console.log(slots);
+                timeSlots = data.availableSlots || [];
+                console.log(timeSlots);
             } catch (err) {
                 console.error('Error fetching time slots:', err);
+                // timeSlots remains an empty array
+            }
+
+            // Remove spinner and render slots
+            timeSlotsContainer.innerHTML = '';
+
+            if (timeSlots.length === 0) {
+                timeSlotsContainer.innerHTML = '<div class="text-center text-gray-500 py-8">Aucun créneau disponible pour cette date.</div>';
                 return;
             }
 
-
-            // Generate time slots (for demo)
-            const timeSlots = [
-                '09:00 - 09:30', '10:00 - 10:30', '11:00 - 11:30',
-                '14:00 - 14:30', '15:00 - 15:30', '16:00 - 16:30'
-            ];
-
-            timeSlots.forEach(function(slot) {
+            // Show all slots, but only make available ones selectable
+            timeSlots.forEach(function(slotObj) {
                 const slotElement = document.createElement('div');
-                slotElement.className = 'time-slot p-3 border-2 border-gray-200 rounded-lg text-center cursor-pointer font-semibold transition-all';
-                slotElement.textContent = slot;
+                slotElement.textContent = slotObj.time;
+                if (slotObj.status === 'available') {
+                    slotElement.className = 'time-slot p-3 border-2 border-gray-200 rounded-lg text-center cursor-pointer font-semibold transition-all';
+                    slotElement.addEventListener('click', function() {
+                        // Remove selection from all slots
+                        document.querySelectorAll('.time-slot').forEach(function(s) {
+                            s.classList.remove('selected', 'text-white');
+                            s.classList.add('border-gray-200', 'text-gray-700');
+                        });
 
-                slotElement.addEventListener('click', function() {
-                    // Remove selection from all slots
-                    document.querySelectorAll('.time-slot').forEach(function(s) {
-                        s.classList.remove('selected', 'text-white');
-                        s.classList.add('border-gray-200', 'text-gray-700');
+                        // Add selection to clicked slot
+                        this.classList.remove('border-gray-200', 'text-gray-700');
+                        this.classList.add('selected', 'text-white');
+
+                        // Update booking data
+                        bookingData.time = slotObj.time;
+
+                        // Update UI
+                        document.getElementById('summary-date').textContent = document.getElementById('selected-date-text').textContent.replace('Créneaux disponibles le ', '');
+                        document.getElementById('summary-time').textContent = slotObj.time;
+                        document.getElementById('selected-time-summary').classList.remove('hidden');
+
+                        // Update confirmation step
+                        document.getElementById('confirm-time').textContent = slotObj.time;
+                        document.getElementById('success-time').textContent = slotObj.time.split(' - ')[0];
                     });
-
-                    // Add selection to clicked slot
-                    this.classList.remove('border-gray-200', 'text-gray-700');
-                    this.classList.add('selected', 'text-white');
-
-                    // Update booking data
-                    bookingData.time = slot;
-
-                    // Update UI
-                    document.getElementById('summary-date').textContent = document.getElementById('selected-date-text').textContent.replace('Créneaux disponibles le ', '');
-                    document.getElementById('summary-time').textContent = slot;
-                    document.getElementById('selected-time-summary').classList.remove('hidden');
-
-                    // Update confirmation step
-                    document.getElementById('confirm-time').textContent = slot;
-                    document.getElementById('success-time').textContent = slot.split(' - ')[0];
-                });
-
+                } else {
+                    slotElement.className = 'time-slot p-3 border-2 border-gray-200 rounded-lg text-center font-semibold transition-all bg-gray-100 text-gray-400 cursor-not-allowed opacity-60';
+                }
                 timeSlotsContainer.appendChild(slotElement);
             });
         }
 
         // Confirm time button
         document.getElementById('confirm-time-btn').addEventListener('click', function() {
+            // Save booking data
+            console.log('Booking Data:', bookingData);
             goToStep('confirmation');
         });
 

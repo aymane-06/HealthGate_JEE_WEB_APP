@@ -16,14 +16,13 @@ import java.util.Map;
  */
 @WebServlet("/patient/book-appointment")
 public class PatientBookAppointmentServlet extends HttpServlet {
+    @jakarta.inject.Inject
+    private com.cliniqueDigitaleJEE.service.PatientService patientService;
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!checkPatientAccess(req, resp)) return;
-        
-        // TODO: Fetch available doctors and specialties
-        req.setAttribute("specialties", getMockSpecialties());
-        req.setAttribute("doctors", getMockDoctors());
+
+
         
         req.getRequestDispatcher("/WEB-INF/patient/book-appointment.jsp").forward(req, resp);
     }

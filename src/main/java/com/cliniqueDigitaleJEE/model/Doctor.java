@@ -13,6 +13,12 @@ import java.util.List;
 @Entity
 @Table(name = "doctors")
 public class Doctor extends User{
+    public String getLocation() {
+        if (responsibleDepartment != null && responsibleDepartment.getLocation() != null) {
+            return responsibleDepartment.getLocation();
+        }
+        return "";
+    }
     @Column(unique = true, nullable = false)
     private String matricule;
     @Column(nullable = true, columnDefinition = "varchar(255)")

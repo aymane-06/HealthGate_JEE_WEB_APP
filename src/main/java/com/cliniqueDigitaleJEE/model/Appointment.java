@@ -10,6 +10,14 @@ import java.util.UUID;
 @Entity
 @Table(name = "appointments")
 public class Appointment {
+    public String getTime() {
+        return startTime != null ? startTime.toString() : "";
+    }
+    public String getLocation() {
+        // You can customize this to return a real location if needed
+        return doctor != null && doctor.getLocation() != null ? doctor.getLocation() : "";
+    }
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
@@ -32,6 +40,8 @@ public class Appointment {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "medical_note_id")
     private MedicalNote medicalNote;
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String remarks;
     public Appointment() {}
     public Appointment(LocalDate date, LocalTime startTime, LocalTime endTime, AppointmentStatus status, Doctor doctor, Patient patient, MedicalNote medicalNote) {
         this.date = date;
@@ -89,6 +99,26 @@ public class Appointment {
     }
     public void setMedicalNote(MedicalNote medicalNote) {
         this.medicalNote = medicalNote;
+    }
+    public String getType() {
+        // You can customize this to return a real type if needed
+        return "Consultation";
+    }
+    public String getDoctorName() {
+        return doctor != null ? doctor.getName() : "";
+    }
+    // For JSP rendering: get day and month as string
+    public String getDay() {
+        return date != null ? String.valueOf(date.getDayOfMonth()) : "";
+    }
+    public String getMonth() {
+        return date != null ? date.getMonth().name().substring(0, 3) : "";
+    }
+    public String getRemarks() {
+        return remarks;
+    }
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
 
