@@ -12,5 +12,6 @@ public interface DoctorRepository {
     void save(Doctor doctor);
     void update(Doctor doctor);
     void delete(UUID id);
+    Doctor findByIdWithAppointments(UUID id);
 }
 

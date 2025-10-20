@@ -2,10 +2,13 @@ package com.cliniqueDigitaleJEE.model;
 
 import com.cliniqueDigitaleJEE.model.ENUMS.AvailabilityStatus;
 import com.cliniqueDigitaleJEE.model.ENUMS.Role;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.lang.ref.Reference;
+import java.util.ArrayList;
 import java.util.List;
 @Entity
 @Table(name = "doctors")
@@ -16,13 +19,19 @@ public class Doctor extends User{
     private String title;
     @ManyToOne
     @JoinColumn(name = "specialty_id", nullable = true)
-    @JsonManagedReference
+    @JsonBackReference("doctor-specialty")
     private Specialty specialty;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonManagedReference("doctor-availabilities")
     private List<Availability> availabilities = new java.util.ArrayList<>();
 
     @OneToOne(mappedBy = "responsibleDoctor", fetch = FetchType.EAGER)
+    @JsonBackReference("department-responsibleDoctor")
     private Department responsibleDepartment;
+
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Appointment> appointments = new ArrayList<>();
 
     public Doctor() {
         super();
@@ -70,6 +79,14 @@ public class Doctor extends User{
 
     public void setResponsibleDepartment(Department responsibleDepartment) {
         this.responsibleDepartment = responsibleDepartment;
+    }
+
+    public List<Appointment> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<Appointment> appointments) {
+        this.appointments = appointments;
     }
 
     @PrePersist

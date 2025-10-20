@@ -50,5 +50,11 @@ public class DoctorRepositoryImpl implements DoctorRepository {
             em.remove(doctor);
         }
     }
-}
 
+    public Doctor findByIdWithAppointments(UUID id) {
+        return em.createQuery(
+                        "SELECT d FROM Doctor d LEFT JOIN FETCH d.appointments WHERE d.id = :id", Doctor.class)
+                .setParameter("id", id)
+                .getSingleResult();
+    }
+}

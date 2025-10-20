@@ -38,6 +38,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
+
     <style>
         * { font-family: 'Inter', sans-serif; }
 
@@ -372,7 +373,7 @@
                 </div>
 
                 <!-- Specialities Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div id="specialties-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     <!-- Speciality Card 1 -->
                     <div class="speciality-card bg-white rounded-2xl shadow-sm border-2 border-gray-100 overflow-hidden fade-in" data-speciality-id="cardio" data-speciality-name="Cardiologie">
                         <div class="p-6">
@@ -499,7 +500,7 @@
                 </div>
 
                 <!-- Doctors Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="doctors-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                     <!-- Doctor Card 1 -->
                     <div class="doctor-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden fade-in">
@@ -884,6 +885,7 @@
     let bookingData = {
         departmentId: null,
         departmentName: null,
+        departmentLocation: null,
         specialityId: null,
         specialityName: null,
         doctorId: null,
@@ -926,6 +928,7 @@
             card.className = `department-card bg-white rounded-2xl shadow-sm border-2 border-gray-100 overflow-hidden fade-in`;
             card.setAttribute('data-department-id', department.id);
             card.setAttribute('data-department-name', department.name);
+            card.setAttribute('data-department-location', department.location || '');
 
             // Specialties count display
             let specialtiesHtml = '<span class="ml-2 text-xs text-gray-500">' +
@@ -983,17 +986,19 @@
     }
 
     async function loadSpecialities(departmentId) {
+        console.log(departmentId);
         try {
             // Show loading spinner
             document.getElementById('specialities-loading').style.display = 'flex';
 
-            const response = await fetch('${pageContext.request.contextPath}/api/patient/departments/' + departmentId + '/specialities');
+            const response = await fetch('${pageContext.request.contextPath}/api/patient/departments/' + departmentId + '/specialties');
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            const specialities= data.specialities;
-            renderspecialities(specialities)
+            const specialities= data.specialties;
+            console.log(specialities);
+            renderspecialities(specialities);
 
             // Hide loading spinner
             document.getElementById('specialities-loading').style.display = 'none';
@@ -1005,45 +1010,52 @@
         }
     }
 
-
-    // Smooth animations and interactions
-    document.addEventListener('DOMContentLoaded', async function() {
-
-       await loadDepartments();
-
-        // Department selection
-        const departmentCards = document.querySelectorAll('.department-card');
-        console.log(departmentCards);
-        departmentCards.forEach(function(card) {
-            card.addEventListener('click', function() {
-                const departmentId = this.getAttribute('data-department-id');
-                const departmentName = this.getAttribute('data-department-name');
-
-                // Store department data
-                bookingData.departmentId = departmentId;
-                bookingData.departmentName = departmentName;
-
-                // Remove selection from all cards
-                departmentCards.forEach(function(c) {
-                    c.classList.remove('selected');
-                    c.style.borderColor = '#e5e7eb';
-                });
-
-                // Add selection to clicked card
-                this.classList.add('selected');
-                this.style.borderColor = '#3B82F6';
-
-                // Update selected department info in next step
-                document.getElementById('selected-department-name').textContent = departmentName;
-
-                loadSpecialities(departmentId);
-                // Move to next step after a short delay for better UX
-                setTimeout(function() {
-                    goToStep('speciality');
-                }, 500);
-
-            });
+    function renderspecialities(specialities) {
+        const container = document.getElementById('specialties-list');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!Array.isArray(specialities) || specialities.length === 0) {
+            container.innerHTML = '<p>Aucune spécialité trouvée.</p>';
+            return;
+        }
+        const cardsWrapper = document.createElement('div');
+        cardsWrapper.className = 'flex flex-wrap gap-6';
+        specialities.forEach(function(spec, idx) {
+            var card = document.createElement('div');
+            card.className = 'speciality-card bg-white rounded-2xl shadow-sm border-2 border-gray-100 overflow-hidden fade-in';
+            card.setAttribute('data-speciality-id', spec.id || '');
+            card.setAttribute('data-speciality-name', spec.name || '');
+            card.style.animationDelay = (0.2 + idx * 0.1) + 's';
+            card.innerHTML =
+                '<div class="p-6">' +
+                '<div class="flex items-center justify-between mb-4">' +
+                '<div class="flex items-center space-x-4">' +
+                '<div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center text-white">' +
+                '<i class=" fas ' + spec.icon + ' text-2xl"></i>' +
+                '</div>' +
+                '<div>' +
+                '<h4 class="font-bold text-gray-900">' + spec.name + '</h4>' +
+                '<span class="text-sm text-purple-600 font-semibold">' + (spec.description || '') + '</span>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div class="space-y-2 mb-4 text-sm text-gray-600">' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-user-md text-blue-500 w-5"></i>' +
+                '<span class="ml-2">' + (spec.doctorsCount ? spec.doctorsCount + ' médecins disponibles' : 'Médecins disponibles') + '</span>' +
+                '</div>' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-clock text-green-500 w-5"></i>' +
+                '<span class="ml-2">Délai moyen: ' + (spec.avgDelay ? spec.avgDelay : 'N/A') + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="text-center">' +
+                '<span class="text-primary-600 font-semibold">Sélectionner</span>' +
+                '</div>' +
+                '</div>';
+            cardsWrapper.appendChild(card);
         });
+        container.appendChild(cardsWrapper);
 
         // Speciality selection
         const specialityCards = document.querySelectorAll('.speciality-card');
@@ -1066,8 +1078,10 @@
                 this.classList.add('selected');
                 this.style.borderColor = '#3B82F6';
 
+                loadDoctors(specialityId);
                 // Update selected speciality info in next step
                 document.getElementById('selected-speciality-name').textContent = specialityName;
+
 
                 // Move to next step after a short delay for better UX
                 setTimeout(function() {
@@ -1075,7 +1089,126 @@
                 }, 500);
             });
         });
+    }
 
+    async function loadDoctors(specialityId) {
+        if (!specialityId) return;
+        console.log(specialityId);
+        const container = document.getElementById('doctors-list');
+        if (container) {
+            container.innerHTML = '<div class="doctor-loading-spinner" style="display:flex;justify-content:center;align-items:center;height:80px;">' +
+                '<div class="spinner-border" style="width:2rem;height:2rem;border:4px solid #ccc;border-top:4px solid #6c63ff;border-radius:50%;animation:spin 1s linear infinite;"></div>' +
+                '</div>' +
+                '<style>@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}</style>';
+        }
+        try {
+            const response = await fetch('${pageContext.request.contextPath}/api/patient/departments/' + specialityId + '/doctors');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            const doctors= data.doctors;
+            console.log(doctors);
+            renderDoctors(doctors);
+        } catch (err) {
+            console.error('Error fetching doctors:', err);
+            return;
+        }
+    }
+
+    function renderDoctors(doctors) {
+        let container = document.getElementById('doctors-list');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!Array.isArray(doctors) || doctors.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-500 py-8">Aucun médecin trouvé pour cette spécialité.</p>';
+            return;
+        }
+
+        doctors.forEach(function(doc, idx) {
+            let specialty = doc.specialty || {};
+            let iconClass = specialty.icon || '';
+            let specialtyName = specialty.name || doc.title || '';
+            let specialtyColor = specialty.color || '#3b82f6';
+
+            // Icon or fallback
+            let iconHtml = '';
+            if (iconClass && iconClass.indexOf('fa') !== -1) {
+                if (!iconClass.includes('fa ')) iconClass = 'fas ' + iconClass;
+                iconHtml = '<i class="' + iconClass + ' text-2xl"></i>';
+            } else {
+                let fallbackChar = specialtyName ? specialtyName.charAt(0).toUpperCase() : '?';
+                iconHtml = '<span class="text-2xl font-bold">' + fallbackChar + '</span>';
+            }
+
+            // Calculate avg availability (in hours per week)
+            let avgHours = 0;
+            if (Array.isArray(doc.availabilities) && doc.availabilities.length > 0) {
+                avgHours = doc.availabilities.reduce(function(sum, av) {
+                    if(av.status==="UNAVAILABLE") return sum;
+                    let start = av.startTime ? parseInt(av.startTime.split(':')[0], 10) : 0;
+                    let end = av.endTime ? parseInt(av.endTime.split(':')[0], 10) : 0;
+                    return sum + Math.max(0, end - start);
+                }, 0);
+            }
+
+            // Get location from global selectedDepartment if available
+            let location = bookingData.departmentLocation || "Non spécifié";
+
+            // Doctor card with combined styling
+            let card = document.createElement('div');
+            card.className = 'doctor-card bg-white rounded-2xl shadow-sm border-2 border-gray-100 overflow-hidden fade-in';
+            card.setAttribute('data-doctor-id', doc.id);
+            card.setAttribute('data-doctor-name', doc.name || '');
+            card.setAttribute('data-doctor-specialty', specialtyName);
+
+            card.innerHTML =
+                '<div class="p-6">' +
+                '<div class="flex items-start justify-between mb-4">' +
+                '<div class="flex items-center space-x-4">' +
+                '<div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">' +
+                iconHtml +
+                '</div>' +
+                '<div>' +
+                '<h4 class="font-bold text-gray-900">' + (doc.name || '') + '</h4>' +
+                '<span class="text-sm text-blue-600 font-semibold">' + specialtyName + '</span>' +
+                '<div class="text-xs text-gray-500 mt-1">' + (doc.email || '') + '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div class="text-right">' +
+                '<div class="flex items-center text-yellow-400">' +
+                '<i class="fas fa-star"></i>' +
+                '<span class="text-gray-700 font-bold ml-1">' + (doc.rating || '4.9') + '</span>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="space-y-2 mb-4 text-sm text-gray-600">' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-user-md text-blue-500 w-5"></i>' +
+                '<span class="ml-2">' + (doc.experience || 'N/A') + ' ans d\'expérience</span>' +
+                '</div>' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-clock text-green-500 w-5"></i>' +
+                '<span class="ml-2">Disponibilité: ' + avgHours + 'h/semaine</span>' +
+                '</div>' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-map-marker-alt text-red-500 w-5"></i>' +
+                '<span class="ml-2">' + location + '</span>' +
+                '</div>' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-envelope text-purple-500 w-5"></i>' +
+                '<span class="ml-2">' + (doc.email || 'Non spécifié') + '</span>' +
+                '</div>' +
+                '</div>' +
+
+                '<button class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-md select-doctor" data-doctor-id="' + doc.id + '" data-doctor-name="' + (doc.name || '') + '">' +
+                'Choisir ce docteur' +
+                '</button>' +
+                '</div>';
+
+            container.appendChild(card);
+        });
         // Doctor selection
         const doctorCards = document.querySelectorAll('.select-doctor');
         doctorCards.forEach(function(card) {
@@ -1083,6 +1216,7 @@
                 const doctorId = this.getAttribute('data-doctor-id');
                 const doctorName = this.getAttribute('data-doctor-name');
 
+                let SlectedDoctor=doctors.filter(doc=>doc.id==doctorId)[0];
                 // Store doctor data
                 bookingData.doctorId = doctorId;
                 bookingData.doctorName = doctorName;
@@ -1107,12 +1241,62 @@
                 document.getElementById('success-doctor-specialty').textContent = bookingData.doctorSpecialty;
 
                 // Initialize calendar for date/time selection
-                initializeCalendar();
+                initializeCalendar(SlectedDoctor.availabilities);
 
                 // Move to next step
                 goToStep('datetime');
             });
         });
+    }
+
+
+
+
+
+    // Smooth animations and interactions
+    document.addEventListener('DOMContentLoaded', async function() {
+
+       await loadDepartments();
+
+        // Department selection
+        const departmentCards = document.querySelectorAll('.department-card');
+        console.log(departmentCards);
+        departmentCards.forEach(function(card) {
+            card.addEventListener('click', function() {
+                const departmentId = this.getAttribute('data-department-id');
+                const departmentName = this.getAttribute('data-department-name');
+                const departmentLocation = this.getAttribute('data-department-location');
+
+                // Store department data
+                bookingData.departmentId = departmentId;
+                bookingData.departmentName = departmentName;
+                bookingData.departmentLocation = departmentLocation;
+
+                // Remove selection from all cards
+                departmentCards.forEach(function(c) {
+                    c.classList.remove('selected');
+                    c.style.borderColor = '#e5e7eb';
+                });
+
+                // Add selection to clicked card
+                this.classList.add('selected');
+                this.style.borderColor = '#3B82F6';
+
+                // Update selected department info in next step
+                document.getElementById('selected-department-name').textContent = departmentName;
+
+                loadSpecialities(departmentId);
+                // Move to next step after a short delay for better UX
+                setTimeout(function() {
+                    goToStep('speciality');
+                }, 500);
+
+            });
+        });
+
+
+
+
 
         // Change department button
         document.getElementById('change-department-btn').addEventListener('click', function() {
@@ -1142,8 +1326,7 @@
             createConfetti();
         });
 
-        // Initialize calendar on page load
-        initializeCalendar();
+
     });
 
     // Function to navigate between steps
@@ -1266,7 +1449,7 @@
     }
 
     // Calendar functionality
-    function initializeCalendar() {
+    function initializeCalendar(availabilities) {
         const currentMonthElement = document.getElementById('current-month');
         const calendarDaysElement = document.getElementById('calendar-days');
         const prevMonthButton = document.getElementById('prev-month');
@@ -1300,28 +1483,32 @@
                 calendarDaysElement.appendChild(emptyDay);
             }
 
+            const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+
             // Add days of the month
             for (let i = 1; i <= daysInMonth; i++) {
+                const dateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+                const dayName = dayNames[dateObj.getDay()];
+                const now = new Date();
+                const avalabilityForDay= availabilities.filter(av=>av.day===dayName && av.status==="AVAILABLE")[0];
+
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day h-12 flex items-center justify-center rounded-lg cursor-pointer transition-all';
-
-                // Mark some days as available (for demo purposes)
-                if (i % 3 !== 0 && i > currentDate.getDate()) {
+                //Mark passed and unavailable days
+                if (dateObj > now && avalabilityForDay) {
                     dayElement.classList.add('bg-blue-50', 'text-blue-700', 'font-semibold');
                     dayElement.setAttribute('data-available', 'true');
-                } else if (i <= currentDate.getDate()) {
-                    dayElement.classList.add('bg-gray-100', 'text-gray-400');
-                    dayElement.classList.remove('cursor-pointer');
                 } else {
-                    dayElement.classList.add('bg-gray-100', 'text-gray-500');
+                    dayElement.classList.add('bg-gray-100', 'text-gray-400');
                     dayElement.classList.remove('cursor-pointer');
                 }
 
                 dayElement.textContent = i;
                 dayElement.setAttribute('data-day', i);
+                dayElement.setAttribute('day-name', dayName);
 
                 // Add click event
-                if (i > currentDate.getDate() && i % 3 !== 0) {
+                if (dateObj > now && avalabilityForDay) {
                     dayElement.addEventListener('click', function() {
                         // Remove selection from all days
                         document.querySelectorAll('.calendar-day').forEach(function(day) {
@@ -1341,7 +1528,7 @@
 
                         // Update UI
                         updateSelectedDate(selectedDate);
-                        generateTimeSlots();
+                        generateTimeSlots(dateObj);
                     });
                 }
 
@@ -1367,9 +1554,32 @@
             document.getElementById('success-day').textContent = dayName;
         }
 
-        function generateTimeSlots() {
+
+
+        async function generateTimeSlots(dateObj) {
             const timeSlotsContainer = document.getElementById('time-slots-container');
             timeSlotsContainer.innerHTML = '';
+
+            console.log(dateObj);
+            // fetch available time slots from server based on selected date and doctor
+            let doctorId = bookingData.doctorId;
+            let dayName = dateObj.toLocaleDateString('fr-FR', { weekday: 'long' });
+            console.log(bookingData);
+
+            let response;
+            try {
+                response = await fetch('${pageContext.request.contextPath}/api/patient/doctors/' + doctorId + '/availabilities?day=' + dateObj);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                const slots= data.timeSlots; // Assume server returns an array of time slots
+                console.log(slots);
+            } catch (err) {
+                console.error('Error fetching time slots:', err);
+                return;
+            }
+
 
             // Generate time slots (for demo)
             const timeSlots = [

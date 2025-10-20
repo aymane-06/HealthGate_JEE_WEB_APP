@@ -22,12 +22,13 @@ public class Department {
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isActive;
     @OneToMany(mappedBy = "department", fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @JsonManagedReference("department-specialties")
     private List<Specialty> specialties;
     @OneToOne(
         optional = true
     )
     @JoinColumn(name = "responsibleDoctor_id", referencedColumnName = "id")
+    @JsonManagedReference("department-responsibleDoctor")
     private Doctor responsibleDoctor;
 
     @Column(nullable = true)

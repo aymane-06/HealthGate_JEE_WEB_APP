@@ -5,6 +5,8 @@ import com.cliniqueDigitaleJEE.repository.Interfaces.DoctorRepository;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,5 +39,19 @@ public class DoctorService {
     public void delete(UUID id) {
         doctorRepository.delete(id);
     }
+
+    public boolean isSlotBooked(Doctor doctor, LocalDate localDate, LocalTime localTime) {
+        return doctor.getAppointments().stream()
+                .anyMatch(appointment ->
+                        appointment.getDate().equals(localDate) &&
+                                appointment.getStartTime().equals(localTime)
+                );
+    }
+
+    public Doctor findByIdWithAppointments(UUID id) {
+        return doctorRepository.findByIdWithAppointments(id);
+    }
+
 }
+
 

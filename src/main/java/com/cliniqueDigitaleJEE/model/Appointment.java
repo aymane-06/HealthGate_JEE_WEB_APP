@@ -1,6 +1,7 @@
 package com.cliniqueDigitaleJEE.model;
 
 import com.cliniqueDigitaleJEE.model.ENUMS.AppointmentStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -16,13 +17,14 @@ public class Appointment {
     private LocalDate date;
     @Column(nullable = false, columnDefinition = "time")
     private LocalTime startTime;
-    @Column(nullable = false, columnDefinition = "time")
+    @Column(nullable = true, columnDefinition = "time")
     private LocalTime endTime;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
     @ManyToOne
     @JoinColumn(name = "doctor_id")
+    @JsonBackReference("doctor-appointments")
     private Doctor doctor;
     @ManyToOne
     @JoinColumn(name = "patient_id")

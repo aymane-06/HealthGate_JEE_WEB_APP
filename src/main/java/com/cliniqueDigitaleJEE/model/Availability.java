@@ -1,5 +1,6 @@
 package com.cliniqueDigitaleJEE.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import com.cliniqueDigitaleJEE.model.ENUMS.AvailabilityStatus;
 
@@ -18,6 +19,7 @@ public class Availability {
     private AvailabilityStatus status;
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
+    @JsonBackReference("doctor-availabilities")
     private Doctor doctor;
     @Column(nullable = false)
     private String day;
