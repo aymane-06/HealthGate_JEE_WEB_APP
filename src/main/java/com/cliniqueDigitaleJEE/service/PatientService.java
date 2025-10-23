@@ -5,6 +5,9 @@ import com.cliniqueDigitaleJEE.repository.Interfaces.PatientRepository;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,5 +37,13 @@ public class PatientService {
 
     public void delete(UUID id) {
         patientRepository.delete(id);
+    }
+
+    public Boolean hasPatientAppointmentAtDateTime(Patient patient, LocalDate localDate, LocalTime time) {
+        return patient.getAppointments().stream()
+                .anyMatch(appointment ->
+                        appointment.getDate().equals(localDate)&&
+                                appointment.getTime().equals(time)
+                );
     }
 }

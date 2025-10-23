@@ -2,9 +2,11 @@ package com.cliniqueDigitaleJEE.model;
 
 import com.cliniqueDigitaleJEE.model.ENUMS.Gender;
 import com.cliniqueDigitaleJEE.model.ENUMS.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "patients")
@@ -22,6 +24,14 @@ public class Patient extends User{
     private Gender gender;
     @Column(nullable = true)
     private String bloodType;
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<Appointment> appointments;
+
+
+
+
+
 
     public Patient() {}
 
@@ -81,5 +91,13 @@ public class Patient extends User{
 
     public void setBloodType(String bloodType) {
         this.bloodType = bloodType;
+    }
+
+    public List<Appointment> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<Appointment> appointments) {
+        this.appointments = appointments;
     }
 }

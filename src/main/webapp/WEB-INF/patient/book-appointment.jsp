@@ -880,6 +880,9 @@
     </div>
 </div>
 
+<!-- Notification Snackbar -->
+<div id="snack-notif" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:5px; font-weight:bold; z-index:1000;">Notification</div>
+
 <script>
     // Global variables to store booking data
     let bookingData = {
@@ -937,49 +940,49 @@
 
             card.innerHTML =
                 '<div class="p-6">' +
-                    '<div class="flex items-center justify-between mb-4">' +
-                        '<div class="flex items-center space-x-4">' +
-                            '<div class="w-16 h-16 rounded-xl flex items-center justify-center text-white" style="background:' + (department.color || '#4F46E5') + ';">' +
-                                '<i class="fas fa-hospital-symbol text-2xl"></i>' +
-                            '</div>' +
-                            '<div>' +
-                                '<h4 class="font-bold text-gray-900">' + department.name + '</h4>' +
-                                '<span class="text-sm text-blue-600 font-semibold">' + department.description + '</span>' +
-                                '<div class="text-xs text-gray-500 mt-1">Code: ' + department.code + '</div>' +
-                            '</div>' +
-                        '</div>' +
-                        '<div>' +
-                            '<span class="px-2 py-1 rounded text-xs font-bold ' + (department.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700') + '">' +
-                                (department.isActive ? 'Actif' : 'Inactif') +
-                            '</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="space-y-2 mb-4 text-sm text-gray-600">' +
-                        '<div class="flex items-center">' +
-                            '<i class="fas fa-user-md text-blue-500 w-5"></i>' +
-                            '<span class="ml-2">' + department.doctorCount + ' médecins disponibles</span>' +
-                        '</div>' +
-                        '<div class="flex items-center">' +
-                            '<i class="fas fa-clock text-green-500 w-5"></i>' +
-                            '<span class="ml-2">Délai moyen: ' + (department.averageWaitTime || '-') + ' jours</span>' +
-                        '</div>' +
-                        '<div class="flex items-center">' +
-                            '<i class="fas fa-map-marker-alt text-red-500 w-5"></i>' +
-                            '<span class="ml-2">' + (department.location || 'Non spécifié') + '</span>' +
-                        '</div>' +
-                        '<div class="flex items-center">' +
-                            '<i class="fas fa-envelope text-purple-500 w-5"></i>' +
-                            '<span class="ml-2">' + (department.contactInfo || 'Non spécifié') + '</span>' +
-                        '</div>' +
-                        '<div class="flex items-center">' +
-                            '<i class="fas fa-list text-gray-500 w-5"></i>' +
-                            '<span class="ml-2">Nombre de spécialités:</span>' +
-                            specialtiesHtml +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="text-center">' +
-                        '<span class="text-primary-600 font-semibold">Sélectionner</span>' +
-                    '</div>' +
+                '<div class="flex items-center justify-between mb-4">' +
+                '<div class="flex items-center space-x-4">' +
+                '<div class="w-16 h-16 rounded-xl flex items-center justify-center text-white" style="background:' + (department.color || '#4F46E5') + ';">' +
+                '<i class="fas fa-hospital-symbol text-2xl"></i>' +
+                '</div>' +
+                '<div>' +
+                '<h4 class="font-bold text-gray-900">' + department.name + '</h4>' +
+                '<span class="text-sm text-blue-600 font-semibold">' + department.description + '</span>' +
+                '<div class="text-xs text-gray-500 mt-1">Code: ' + department.code + '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div>' +
+                '<span class="px-2 py-1 rounded text-xs font-bold ' + (department.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700') + '">' +
+                (department.isActive ? 'Actif' : 'Inactif') +
+                '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="space-y-2 mb-4 text-sm text-gray-600">' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-user-md text-blue-500 w-5"></i>' +
+                '<span class="ml-2">' + department.doctorCount + ' médecins disponibles</span>' +
+                '</div>' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-clock text-green-500 w-5"></i>' +
+                '<span class="ml-2">Délai moyen: ' + (department.averageWaitTime || '-') + ' jours</span>' +
+                '</div>' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-map-marker-alt text-red-500 w-5"></i>' +
+                '<span class="ml-2">' + (department.location || 'Non spécifié') + '</span>' +
+                '</div>' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-envelope text-purple-500 w-5"></i>' +
+                '<span class="ml-2">' + (department.contactInfo || 'Non spécifié') + '</span>' +
+                '</div>' +
+                '<div class="flex items-center">' +
+                '<i class="fas fa-list text-gray-500 w-5"></i>' +
+                '<span class="ml-2">Nombre de spécialités:</span>' +
+                specialtiesHtml +
+                '</div>' +
+                '</div>' +
+                '<div class="text-center">' +
+                '<span class="text-primary-600 font-semibold">Sélectionner</span>' +
+                '</div>' +
                 '</div>';
             container.appendChild(card);
         });
@@ -1318,9 +1321,23 @@
             goToStep('datetime');
         });
 
+        function showSnackNotif(message, type) {
+            const notif = document.getElementById('snack-notif');
+            notif.textContent = message;
+            notif.style.display = 'block';
+            notif.style.background = type === 'success' ? 'linear-gradient(90deg,#10B981,#34D399)' : 'linear-gradient(90deg,#EF4444,#F87171)';
+            notif.style.color = '#fff';
+            notif.style.border = type === 'success' ? '2px solid #10B981' : '2px solid #EF4444';
+            notif.style.opacity = '1';
+            setTimeout(() => {
+                notif.style.opacity = '0';
+                setTimeout(() => notif.style.display = 'none', 300);
+            }, 3000);
+        }
+
         // Final confirmation button
         document.getElementById('final-confirm-btn').addEventListener('click', async function() {
-            
+
             bookingData.remarks = document.querySelector('#step-confirmation textarea').value;
             bookingData.patientId = '${sessionScope.user.id}';
             console.log(JSON.stringify(bookingData));
@@ -1333,22 +1350,25 @@
                     },
                     body: JSON.stringify(bookingData)
                 });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
                 const data = await response.json();
-                console.log('Booking successful:', data);
+                if (!response.ok) {
+                    throw new Error(data.message || 'Network response was not ok');
+                }
+                showSnackNotif(data.message || 'Rendez-vous confirmé avec succès!', 'success');
             } catch (error) {
-                console.error('Error booking appointment:', error);
+                showSnackNotif(error.message, 'error');
+                return;
             }
 
-            
+
             goToStep('success');
             createConfetti();
         });
 
 
     });
+
+
 
     // Function to navigate between steps
     function goToStep(step) {
@@ -1483,7 +1503,6 @@
             const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
                 "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
             currentMonthElement.textContent = monthNames[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
-
             // Clear previous calendar
             calendarDaysElement.innerHTML = '';
 
@@ -1494,8 +1513,10 @@
 
             // Get day of week for first day (0 = Sunday, 1 = Monday, etc.)
             let firstDayIndex = firstDay.getDay();
+
             // Adjust for Monday as first day of week
             firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
 
             // Add empty cells for days before the first day of the month
             for (let i = 0; i < firstDayIndex; i++) {
@@ -1516,7 +1537,7 @@
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day h-12 flex items-center justify-center rounded-lg cursor-pointer transition-all';
                 //Mark passed and unavailable days
-                if (dateObj > now && avalabilityForDay) {
+                if (dateObj.getDate() >= now.getDate() && avalabilityForDay) {
                     dayElement.classList.add('bg-blue-50', 'text-blue-700', 'font-semibold');
                     dayElement.setAttribute('data-available', 'true');
                 } else {
@@ -1529,7 +1550,7 @@
                 dayElement.setAttribute('day-name', dayName);
 
                 // Add click event
-                if (dateObj > now && avalabilityForDay) {
+                if (dateObj.getDate() >= now.getDate() && avalabilityForDay) {
                     dayElement.addEventListener('click', function() {
                         // Remove selection from all days
                         document.querySelectorAll('.calendar-day').forEach(function(day) {

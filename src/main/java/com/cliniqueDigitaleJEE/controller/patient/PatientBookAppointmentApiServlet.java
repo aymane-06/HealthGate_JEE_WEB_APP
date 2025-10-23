@@ -2,6 +2,7 @@ package com.cliniqueDigitaleJEE.controller.patient;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.UUID;
@@ -71,14 +72,26 @@ public class PatientBookAppointmentApiServlet extends HttpServlet {
         }
 
         // Parse date string as LocalDateTime, then extract LocalDate (frontend sends yyyy-MM-ddTHH:mm:ss)
-        java.time.LocalDateTime localDateTime = java.time.LocalDateTime.parse(dto.date);
-        java.time.LocalDate localDate = localDateTime.toLocalDate();
+        LocalDateTime localDateTime = LocalDateTime.parse(dto.date);
+        LocalDate localDate = localDateTime.toLocalDate();
 
-        Boolean isBooked = doctorService.isSlotBooked(doctor, localDate, java.time.LocalTime.parse(dto.time));
+        Boolean isBooked = doctorService.isSlotBooked(doctor, localDate, LocalTime.parse(dto.time));
 
         if (isBooked) {
             resp.setStatus(HttpServletResponse.SC_CONFLICT);
             objectMapper.writeValue(resp.getWriter(), Map.of("status", "error", "message", "Time slot already booked"));
+            return;
+        }
+        Boolean hasBooked = appointmentService.hasPatientBookedAppointmentOnDate(patient,doctor ,localDate,java.time.LocalTime.parse(dto.time));
+        if (hasBooked) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+            objectMapper.writeValue(resp.getWriter(), Map.of("status", "error", "message", "Patient has already booked an appointment on this date with this doctor"));
+            return;
+        }
+        Boolean hasASameTimeAppointment = patientService.hasPatientAppointmentAtDateTime(patient, localDate, java.time.LocalTime.parse(dto.time));
+        if (hasASameTimeAppointment) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+            objectMapper.writeValue(resp.getWriter(), Map.of("status", "error", "message", "Patient has another appointment at the same time"));
             return;
         }
 
@@ -101,22 +114,23 @@ public class PatientBookAppointmentApiServlet extends HttpServlet {
                 "appointmentId", appointment.getId(),
                 "date", appointment.getDate().toString(),
                 "startTime", appointment.getStartTime().toString(),
-                "endTime", appointment.getEndTime().toString()
+                "endTime", appointment.getEndTime().toString(),
+                    "message", "Appointment booked successfully"
             );
             resp.setStatus(HttpServletResponse.SC_OK);
-            objectMapper.writeValue(resp.getWriter(), responseMap); 
+            objectMapper.writeValue(resp.getWriter(), responseMap);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             objectMapper.writeValue(resp.getWriter(), Map.of("status", "error", "message", e.getMessage()));
         }
-        
-
-        
-
-        
 
 
-        
+
+
+
+
+
+
     }
 
 }

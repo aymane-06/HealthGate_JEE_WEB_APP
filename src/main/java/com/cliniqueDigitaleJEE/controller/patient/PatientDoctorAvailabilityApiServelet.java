@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static java.util.spi.ToolProvider.findFirst;
@@ -76,7 +77,12 @@ public class PatientDoctorAvailabilityApiServelet extends HttpServlet {
             List<Map<String, Object>> availableSlots = new ArrayList<>();
             LocalDateTime startDateTime = LocalDateTime.of(dateTime.toLocalDate(), availability.getStartTime());
             LocalDateTime endDateTime = LocalDateTime.of(dateTime.toLocalDate(), availability.getEndTime());
-            java.time.format.DateTimeFormatter slotFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            if(dateTime.toLocalDate().isEqual(currentDateTime.toLocalDate()) && startDateTime.isBefore(currentDateTime)){
+                startDateTime=currentDateTime.plusMinutes(120); // add 2 hours buffer for same-day bookings
+            }
+            DateTimeFormatter slotFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
+
             while (startDateTime.isBefore(endDateTime)) {
                 String slotTime = startDateTime.format(slotFormatter);
                 boolean isBooked = doctorService.isSlotBooked(doctor, dateTime.toLocalDate(), startDateTime.toLocalTime());

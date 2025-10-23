@@ -36,6 +36,7 @@ public class Appointment {
     private Doctor doctor;
     @ManyToOne
     @JoinColumn(name = "patient_id")
+    @JsonBackReference("patient-appointments")
     private Patient patient;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "medical_note_id")
